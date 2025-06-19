@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simple Scoreboard</title>
+
+  <!-- Manifest and Theme -->
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#000000">
+
+  <!-- External Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- Buttons -->
+<button id="infoButton" onclick="showTutorial()">?</button>
+<button id="installButton" style="display:none;">Install App</button>
+
+<!-- Home Run Overlays -->
+<div id="homeRunOverlays">
+  <!-- Populated by JS: displayHomeRunMessage uses these -->
+  <div class="overlay" id="homeRunMessage0"><img src="./images/homerun0.gif" alt="Home Run 0"></div>
+  <div class="overlay" id="homeRunMessage1"><img src="./images/homerun1.gif" alt="Home Run 1"></div>
+  <div class="overlay" id="homeRunMessage2"><img src="./images/homerun2.gif" alt="Home Run 2"></div>
+  <div class="overlay" id="homeRunMessage3"><img src="./images/homerun3.gif" alt="Home Run 3"></div>
+  <div class="overlay" id="homeRunMessage4"><img src="./images/homerun4.gif" alt="Home Run 4"></div>
+  <div class="overlay" id="homeRunMessage5"><img src="./images/homerun5.gif" alt="Home Run 5"></div>
+  <div class="overlay" id="homeRunMessage6"><img src="./images/homerun6.gif" alt="Home Run 6"></div>
+  <div class="overlay" id="homeRunMessage7"><img src="./images/homerun7.gif" alt="Home Run 7"></div>
+  <div class="overlay" id="homeRunMessage8"><img src="./images/homerun8.gif" alt="Home Run 8"></div>
+  <div class="overlay" id="homeRunMessage9"><img src="./images/homerun9.gif" alt="Home Run 9"></div>
+</div>
+
+<!-- Scoreboard Grid -->
+<div class="grid-container">
+  <div class="grid-team" id="team1">
+    <div class="grid-name" onclick="openDropdown('team1')">
+      <span class="name">Away - Team 1</span>
+      <select onchange="updateTeam(this, 'team1')" onblur="closeDropdown(this)"></select>
+    </div>
+    <div class="grid-score">
+      <img src="logo/away-team-logo.png" alt="Team 1 Logo" class="logo" onclick="incrementScoreFromLogo(this)">
+      <span class="score" data-score="-1" onclick="incrementScore(this)" oncontextmenu="decrementScore(this); return false;">-1</span>
+    </div>
+  </div>
+  <div class="grid-team" id="team2">
+    <div class="grid-name" onclick="openDropdown('team2')">
+      <span class="name">Home - Team 2</span>
+      <select onchange="updateTeam(this, 'team2')" onblur="closeDropdown(this)"></select>
+    </div>
+    <div class="grid-score">
+      <img src="logo/home-team-logo.png" alt="Team 2 Logo" class="logo" onclick="incrementScoreFromLogo(this)">
+      <span class="score" data-score="-1" onclick="incrementScore(this)" oncontextmenu="decrementScore(this); return false;">-1</span>
+    </div>
+  </div>
+</div>
+
+<!-- Tutorial Overlay -->
+<div id="tutorialOverlay" style="display: none;" class="overlay tutorial">
+  <div class="tutorial-content">
+    <center>
+      <h1>Simple Scoreboard<br>Quick Tutorial</h1>
+    </center>
+    <ul>
+      <li>Tap team name to change it</li>
+      <li>Tap team logo to begin scoring</li>
+      <li>Tap a score to increase it</li>
+      <li>Long-press to decrease score</li>
+      <li>Score below 0 will display logo</li>
+      <br>
+      <li>Mouse Left-click = Tap</li>
+      <li>Mouse Right-click = Long-press</li>
+      <li>Animation keys: H, R, S, 0-9</li>
+    </ul>
+    <center>
+      <button onclick="closeTutorial()">Got it</button>
+    </center>
+  </div>
+</div>
+
+<!-- External JS -->
+<script src="teams-config.js"></script>
+<script src="script.js"></script>
+
+</body>
+</html>
