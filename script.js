@@ -137,10 +137,24 @@ function resetInfoButtonTimer() {
   }, 5000);
 }
 
+setTimeout(() => {
+  const box = document.getElementById("inningBox");
+  if (inning === 0) {
+    box.classList.add("visible"); // Full opacity
+    setTimeout(() => {
+      // After 2s, fade to faint if still unused
+      if (inning === 0) {
+        box.classList.remove("visible");
+        box.classList.add("faint");
+      }
+    }, 2000);
+  }
+}, 5000); // Sync with infoButton hide
+
 // Keyboard mapping for home run messages
 const keyToMessage = {
-  '=': 1, 'h': 1, 'q': 1,
-  '-': 2, 'r': 2, 's': 2,
+  '=': 1, 'h': 1,
+  '-': 2, 'r': 2,
   '0': 0, '1': 1, '2': 2, '3': 3, '4': 4,
   '5': 5, '6': 6, '7': 7, '8': 8, '9': 9,
 };
@@ -209,3 +223,31 @@ window.addEventListener("DOMContentLoaded", () => {
     resetInfoButtonTimer();
   }
 });
+
+let inning = 0;
+
+function updateInningDisplay() {
+  const box = document.getElementById("inningBox");
+  const value = box.querySelector(".inning-value");
+
+  // Reset all states
+  box.classList.remove("faint", "visible");
+
+  if (inning === 0) {
+    value.textContent = "";
+    box.classList.add("faint"); // Stay faint
+  } else {
+    value.textContent = inning;
+    box.classList.add("visible");
+  }
+}
+
+function incrementInning() {
+  inning = (inning + 1) % 8; // 1–7, then hidden
+  updateInningDisplay();
+}
+
+function decrementInning() {
+  inning = inning === 0 ? 7 : inning - 1;
+  updateInningDisplay();
+}

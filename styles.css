@@ -169,3 +169,68 @@ button, .score, .logo, .grid-name, .grid-score {
   -webkit-user-select: none;
   user-select: none;
 }
+
+.inning-box {
+  position: absolute;
+  top: 10vh; /* aligns top edge with score boxes */
+  left: 50%;
+  width: 15vh;
+  height: 15vh;
+  transform: translateX(-50%);
+  background-color: white;
+  border: 2px solid black;
+  border-radius: 0.5vh; /* 1rem, 0.5vh; */
+  color: black;
+  text-align: center;
+  
+  transform: translateX(-50%);
+  overflow: hidden;
+  font-size: 1vh; /* 4vh */
+  pointer-events: auto;
+  z-index: 900;
+  transition: opacity 0.5s ease;
+  opacity: 0;
+}
+
+.inning-label {
+  position: absolute;
+  top: -5%;
+  width: 100%;
+  text-align: center;
+  font-size: 4vh;    /* 4em, 4vh */
+  font-weight: bold;
+  line-height: 1;
+  z-index: 1;
+  pointer-events: none;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.inning-value {
+       position: absolute;
+      top: 55%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 15vh;   /* 15em, 20vh */
+      font-weight: bold;
+      line-height: 1;
+      z-index: 0;
+      pointer-events: none;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.inning-box.hidden {
+  opacity: 0.05;              /* Faintly visible for testing */
+  pointer-events: auto;       /* Still clickable */
+}
+
+.inning-box.brief-visible {
+  opacity: 1;
+}
+
+.inning-box.faint {
+  opacity: 0.05 !important;
+}
+
+.inning-box.visible {
+  opacity: 1 !important;
+}
