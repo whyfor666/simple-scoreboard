@@ -137,6 +137,7 @@ function resetInfoButtonTimer() {
   }, 5000);
 }
 
+// INNING box visible then fades
 setTimeout(() => {
   const box = document.getElementById("inningBox");
   if (inning === 0) {
@@ -150,6 +151,22 @@ setTimeout(() => {
     }, 2000);
   }
 }, 5000); // Sync with infoButton hide
+
+// OUT box visible then fades
+//  updateOutDisplay();
+
+  setTimeout(() => {
+    const box = document.getElementById("outBox");
+    if (out === 0) {
+      box.classList.add("visible");
+      setTimeout(() => {
+        if (out === 0) {
+          box.classList.remove("visible");
+          box.classList.add("faint");
+        }
+      }, 2000);
+    }
+  }, 5000);
 
 // Keyboard mapping for home run messages
 const keyToMessage = {
@@ -224,6 +241,7 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 });
 
+// INNING box increment/decrement and hidden (faint) at 0
 let inning = 0;
 
 function updateInningDisplay() {
@@ -235,7 +253,7 @@ function updateInningDisplay() {
 
   if (inning === 0) {
     value.textContent = "";
-    box.classList.add("faint"); // Stay faint
+    box.classList.add("faint"); 
   } else {
     value.textContent = inning;
     box.classList.add("visible");
@@ -243,7 +261,7 @@ function updateInningDisplay() {
 }
 
 function incrementInning() {
-  inning = (inning + 1) % 8; // 1–7, then hidden
+  inning = (inning + 1) % 8; // 1–7, then rollover to 0
   updateInningDisplay();
 }
 
@@ -251,3 +269,31 @@ function decrementInning() {
   inning = inning === 0 ? 7 : inning - 1;
   updateInningDisplay();
 }
+
+// OUT box increment/decrement and hidden (faint) at 0
+let out = 0;
+
+function updateOutDisplay() {
+  const box = document.getElementById("outBox");
+  const value = box.querySelector(".out-value");
+  box.classList.remove("faint", "visible");
+
+  if (out === 0) {
+    value.textContent = "";
+    box.classList.add("faint");
+  } else {
+    value.textContent = out;
+    box.classList.add("visible");
+  }
+}
+
+function incrementOut() {
+  out = (out + 1) % 4;  // 1-3, then rollover to 0
+  updateOutDisplay();
+}
+
+function decrementOut() {
+  out = out === 0 ? 3 : out - 1;
+  updateOutDisplay();
+}
+

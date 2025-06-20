@@ -172,17 +172,17 @@ button, .score, .logo, .grid-name, .grid-score {
 
 .inning-box {
   position: absolute;
-  top: 10vh; /* aligns top edge with score boxes */
+  top: 0; /* 10vh; /* aligns top edge with score boxes */
   left: 50%;
   width: 15vh;
   height: 15vh;
   transform: translateX(-50%);
   background-color: white;
   border: 2px solid black;
-  border-radius: 0.5vh; /* 1rem, 0.5vh; */
+  border-top: none;   /* remove bottom border at the window edge */
+  border-radius: 0 0 5vh 5vh; /* only round bottom corners */
   color: black;
   text-align: center;
-  
   transform: translateX(-50%);
   overflow: hidden;
   font-size: 1vh; /* 4vh */
@@ -190,11 +190,12 @@ button, .score, .logo, .grid-name, .grid-score {
   z-index: 900;
   transition: opacity 0.5s ease;
   opacity: 0;
+  cursor:pointer;
 }
 
 .inning-label {
   position: absolute;
-  top: -5%;
+  top: -4%;
   width: 100%;
   text-align: center;
   font-size: 4vh;    /* 4em, 4vh */
@@ -206,7 +207,7 @@ button, .score, .logo, .grid-name, .grid-score {
 }
 
 .inning-value {
-       position: absolute;
+      position: absolute;
       top: 55%;
       left: 50%;
       transform: translate(-50%, -50%);
@@ -218,19 +219,64 @@ button, .score, .logo, .grid-name, .grid-score {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-.inning-box.hidden {
-  opacity: 0.05;              /* Faintly visible for testing */
-  pointer-events: auto;       /* Still clickable */
-}
-
-.inning-box.brief-visible {
-  opacity: 1;
-}
-
 .inning-box.faint {
-  opacity: 0.05 !important;
+  opacity: 0.05 !important; /* set to 0 to fully hide it */
 }
 
 .inning-box.visible {
   opacity: 1 !important;
+}
+
+
+.out-box {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 15vh;
+  height: 15vh;
+  background-color: black;
+  border: 2px solid white;
+  border-bottom: none;  /* remove bottom border at the window edge */
+  border-radius: 5vh 5vh 0 0;  /* only round top corners */
+  transform: translateX(-50%);
+  overflow: hidden;
+  font-size: 1vh;
+  pointer-events: auto;
+  z-index: 9999;
+  transition: opacity 0.5s ease;
+  opacity: 0;
+}
+
+.out-box.faint {
+  opacity: 0.05 !important; /* set to 0 to fully hide it */
+}
+
+.out-box.visible {
+  opacity: 1 !important;
+}
+
+.out-label {
+  position: absolute;
+  top: 75%;
+  width: 100%;
+  text-align: center;
+  font-size: 4em;
+  font-weight: bold;
+  line-height: 1;
+  z-index: 1;
+  pointer-events: none;
+  color: white;
+}
+
+.out-value {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 15em;
+  font-weight: bold;
+  line-height: 1;
+  z-index: 0;
+  pointer-events: none;
+  color: white;
 }
