@@ -1,5 +1,5 @@
 // sw.js with cache versioning and image fallback
-const CACHE_NAME = "scoreboard-cache-v2024-05-08";
+const CACHE_NAME = "scoreboard-cache-v2025-06-06";
 
 const FILES_TO_CACHE = [
   "/",
