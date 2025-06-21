@@ -118,11 +118,15 @@ function updateScoreUI(scoreElement) {
 
 // Tutorial logic
 function showTutorial() {
+  document.getElementById("inningBox").style.pointerEvents = "none";
+  document.getElementById("outBox").style.pointerEvents = "none";
   document.getElementById("tutorialOverlay").style.display = "flex";
   resetInfoButtonTimer();
 }
 
 function closeTutorial() {
+  document.getElementById("inningBox").style.pointerEvents = "auto";
+  document.getElementById("outBox").style.pointerEvents = "auto";
   document.getElementById("tutorialOverlay").style.display = "none";
   localStorage.setItem("tutorialShown", "true");
   resetInfoButtonTimer();

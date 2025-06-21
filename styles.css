@@ -43,7 +43,8 @@ html, body {
 }
 
 .score {
-  font-size: min(75vh, 30vw);
+ /* font-size: min(55vh, 100vw);*/
+ font-size: 40vw;
   font-weight: bold;
   cursor: pointer;
   user-select: none;
@@ -174,8 +175,8 @@ button, .score, .logo, .grid-name, .grid-score {
   position: absolute;
   top: 0; /* 10vh; /* aligns top edge with score boxes */
   left: 50%;
-  width: 15vh;
-  height: 15vh;
+  width: 25vh;
+  height: 30vh;
   transform: translateX(-50%);
   background-color: white;
   border: 2px solid black;
@@ -195,10 +196,10 @@ button, .score, .logo, .grid-name, .grid-score {
 
 .inning-label {
   position: absolute;
-  top: -4%;
+  top: 0%;
   width: 100%;
   text-align: center;
-  font-size: 4vh;    /* 4em, 4vh */
+  font-size: 6vh;    /* 4em, 4vh */
   font-weight: bold;
   line-height: 1;
   z-index: 1;
@@ -211,7 +212,7 @@ button, .score, .logo, .grid-name, .grid-score {
       top: 55%;
       left: 50%;
       transform: translate(-50%, -50%);
-      font-size: 15vh;   /* 15em, 20vh */
+      font-size: 30vh;   /* 15em, 20vh */
       font-weight: bold;
       line-height: 1;
       z-index: 0;
@@ -232,8 +233,8 @@ button, .score, .logo, .grid-name, .grid-score {
   position: absolute;
   bottom: 0;
   left: 50%;
-  width: 15vh;
-  height: 15vh;
+  width: 25vh;
+  height: 25vh;
   background-color: black;
   border: 2px solid white;
   border-bottom: none;  /* remove bottom border at the window edge */
@@ -257,26 +258,36 @@ button, .score, .logo, .grid-name, .grid-score {
 
 .out-label {
   position: absolute;
-  top: 75%;
+  top: 65%;
   width: 100%;
   text-align: center;
-  font-size: 4em;
+  font-size: 8em;
   font-weight: bold;
   line-height: 1;
   z-index: 1;
   pointer-events: none;
   color: white;
+  text-shadow:
+    -2px -2px 0 gray,
+     2px -2px 0 gray,
+    -2px  2px 0 grey,
+     2px  2px 0 gray; 
 }
 
 .out-value {
   position: absolute;
-  top: 40%;
+  top: 45%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-size: 15em;
+  font-size: 25em;
   font-weight: bold;
   line-height: 1;
   z-index: 0;
   pointer-events: none;
   color: white;
+  text-shadow:
+    -2px -2px 0 gray,
+     2px -2px 0 gray,
+    -2px  2px 0 gray,
+     2px  2px 0 gray; 
 }
