@@ -285,19 +285,22 @@ function updateOutDisplay() {
   if (out === 0) {
     value.textContent = "";
     box.classList.add("faint");
-  } else {
-    value.textContent = out;
+  } else if (out === 1){
+    value.textContent = "●";
+    box.classList.add("visible");
+  }else{
+    value.textContent = "●●";
     box.classList.add("visible");
   }
 }
 
 function incrementOut() {
-  out = (out + 1) % 4;  // 1-3, then rollover to 0
+  out = (out + 1) % 3;  // 1-2, then rollover to 0
   updateOutDisplay();
 }
 
 function decrementOut() {
-  out = out === 0 ? 3 : out - 1;
+  out = out === 0 ? 2 : out - 1;
   updateOutDisplay();
 }
 

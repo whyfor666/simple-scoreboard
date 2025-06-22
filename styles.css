@@ -228,17 +228,16 @@ button, .score, .logo, .grid-name, .grid-score {
   opacity: 1 !important;
 }
 
-
 .out-box {
   position: absolute;
   bottom: 0;
   left: 50%;
-  width: 25vh;
-  height: 25vh;
-  background-color: black;
-  border: 2px solid white;
+  width: 30vh;
+  height: 20vh;
+  background-color: white;
+  border: 2px solid black;
   border-bottom: none;  /* remove bottom border at the window edge */
-  border-radius: 5vh 5vh 0 0;  /* only round top corners */
+  border-radius: 7vh 7vh 0 0;  /* only round top corners */
   transform: translateX(-50%);
   overflow: hidden;
   font-size: 1vh;
@@ -266,28 +265,21 @@ button, .score, .logo, .grid-name, .grid-score {
   line-height: 1;
   z-index: 1;
   pointer-events: none;
-  color: white;
-  text-shadow:
-    -2px -2px 0 gray,
-     2px -2px 0 gray,
-    -2px  2px 0 grey,
-     2px  2px 0 gray; 
+  color: red;
 }
+
 
 .out-value {
   position: absolute;
-  top: 45%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 25em;
+  top: -33%;
+  width: 100%;
+  text-align: center;
+  font-size: 24em;
   font-weight: bold;
   line-height: 1;
-  z-index: 0;
+  z-index: 1;
   pointer-events: none;
-  color: white;
-  text-shadow:
-    -2px -2px 0 gray,
-     2px -2px 0 gray,
-    -2px  2px 0 gray,
-     2px  2px 0 gray; 
+  color: black;
+
 }
+
