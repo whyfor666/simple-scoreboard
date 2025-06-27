@@ -138,7 +138,7 @@ function resetInfoButtonTimer() {
   clearTimeout(window._infoHideTimer);
   window._infoHideTimer = setTimeout(() => {
     btn.classList.add("hidden");
-  }, 5000);
+  }, 3000);
 }
 
 // INNING box visible then fades
@@ -157,8 +157,6 @@ setTimeout(() => {
 }, 5000); // Sync with infoButton hide
 
 // OUT box visible then fades
-//  updateOutDisplay();
-
   setTimeout(() => {
     const box = document.getElementById("outBox");
     if (out === 0) {
@@ -171,6 +169,34 @@ setTimeout(() => {
       }, 2000);
     }
   }, 5000);
+  
+  // HR box visible then fades (Left)
+  setTimeout(() => {
+    const box = document.getElementById("hrBoxLeft");
+    if (hr === 0) {
+      box.classList.add("visible");
+      setTimeout(() => {
+        if (hr === 0) {
+          box.classList.remove("visible");
+          box.classList.add("faint");
+        }
+      }, 2000);
+    }
+  }, 3000);
+
+  // HR box visible then fades (Right)
+  setTimeout(() => {
+    const box = document.getElementById("hrBoxRight");
+    if (hr === 0) {
+      box.classList.add("visible");
+      setTimeout(() => {
+        if (hr === 0) {
+          box.classList.remove("visible");
+          box.classList.add("faint");
+        }
+      }, 2000);
+    }
+  }, 3000);
 
 // Keyboard mapping for home run messages
 const keyToMessage = {
@@ -304,3 +330,52 @@ function decrementOut() {
   updateOutDisplay();
 }
 
+// HR box increment/decrement and hidden (faint) at 0
+let hr = 0;
+
+function updateHRDisplay(hrElement){
+  const count = parseInt (hrElement.dataset.hr, 10);
+  const valueElement = hrElement.querySelector(".hr-value");
+
+    if (!valueElement) {
+    console.warn("Missing .hr-value in", hrElement);
+    return;
+  }
+
+
+  hrElement.classList.remove("faint","visible");
+
+  if (count === 0) {
+    valueElement.innerHTML = "";
+    hrElement.classList.add("faint");
+  } else {
+    const icons = count === 1
+    ? ["🥎"]
+    : count === 2
+    ? ["🥎", "🥎"]
+    : ["❌","🥎", "🥎"];
+
+    valueElement.innerHTML = icons
+      .map(b => `<span class="hr-icon">${b}</span>`)
+      .join("");
+
+    hrElement.classList.add("visible"); 
+  }
+}
+
+function incrementHR(hrElement) {
+  let count = parseInt(hrElement.dataset.hr, 10);
+  count = (count + 1) % 4; // 1-3, then rollover to 0
+  hrElement.dataset.hr = count;
+  updateHRDisplay(hrElement)
+  if (count  === 1 || count === 2){  // Display HR message only for HR 1 & 2.
+ /*   displayHomeRunMessage(hr); */
+  }
+}
+
+function decrementHR(hrElement) {
+  let count = parseInt(hrElement.dataset.hr, 10);
+  count = count === 0 ? 3 : count -1; // 3-1 rollunder to 3 from 0
+  hrElement.dataset.hr = count;
+  updateHRDisplay(hrElement);
+}

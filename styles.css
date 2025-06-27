@@ -131,7 +131,7 @@ select.visible {
   color: white;
   border: none;
   border-radius: 0.5rem;
-  cursor: pointer;
+  cursor: help;
   opacity: 1;
   transition: opacity 1s ease;
 }
@@ -182,9 +182,8 @@ button, .score, .logo, .grid-name, .grid-score {
   border: 2px solid black;
   border-top: none;   /* remove bottom border at the window edge */
   border-radius: 0 0 5vh 5vh; /* only round bottom corners */
-  color: black;
+  color: blue;
   text-align: center;
-  transform: translateX(-50%);
   overflow: hidden;
   font-size: 1vh; /* 4vh */
   pointer-events: auto;
@@ -242,9 +241,10 @@ button, .score, .logo, .grid-name, .grid-score {
   overflow: hidden;
   font-size: 1vh;
   pointer-events: auto;
-  z-index: 9999;
+  z-index: 900;
   transition: opacity 0.5s ease;
   opacity: 0;
+  cursor: pointer;
 }
 
 .out-box.faint {
@@ -268,7 +268,6 @@ button, .score, .logo, .grid-name, .grid-score {
   color: red;
 }
 
-
 .out-value {
   position: absolute;
   top: -33%;
@@ -280,6 +279,131 @@ button, .score, .logo, .grid-name, .grid-score {
   z-index: 1;
   pointer-events: none;
   color: black;
-
 }
 
+/* .hr-box-left {
+  position:absolute ;
+  bottom: 0; 
+  width: 40vh;
+  height: 15vh;
+  background-color: rgb(120, 6, 6); 
+  border: 5px solid yellow;
+  border-bottom: none;  
+
+  overflow: hidden;
+  font-size: 2vh;
+  z-index: 999;
+  transition: opacity 0.5s ease;
+  opacity: 1;
+  cursor:crosshair;
+  pointer-events: auto;
+
+  text-align: left;
+  border-left: none;   
+  border-radius: 0 5vh 0 0; 
+} */
+
+/* .hr-box-right {
+  position: absolute ;
+  bottom: 0;
+  width: 40vh;
+  height: 15vh;
+  background-color: black; 
+  border: 5px solid blue;
+  border-bottom: none;   
+
+  overflow: hidden;
+  font-size: 2vh;
+  z-index: 999;
+  transition: opacity 0.5s ease;
+  opacity: .50;
+  cursor:crosshair;
+  pointer-events: auto;
+
+  right: 0;
+  direction: rtl;
+  border-right: none;   
+  border-radius: 5vh 0 0 0;
+
+} */
+
+.hr-box.faint {
+  opacity: 0.05 !important;
+}
+
+.hr-box.visible {
+  opacity: 1 !important;
+}
+
+.hr-box {
+  position: absolute;
+  bottom: 0;
+  /* Let content dictate size */
+  display: inline-flex;            /* shrink-to-fit width based on content */
+  flex-direction: column-reverse;
+  align-items: center;
+  justify-content: flex-end;
+
+  min-width: 8vh;
+  min-height: 8vh;                 /* ensure a minimum box size for clicking */
+  padding: 1vh;
+  background-color: black;
+  border: 2px solid blue;
+  border-bottom: none;
+  /* Include padding/border in the min dimensions: */
+  box-sizing: border-box;          /* so 8vh is the entire box, not just content box */
+  white-space: nowrap;    /* Keep text on one line to calculate width properly: */
+
+  overflow: hidden;
+  font-size: 2vh;
+  z-index: 999;
+  transition: opacity 0.5s ease;
+  opacity: 0;
+  pointer-events: auto;
+  cursor:crosshair;
+}
+
+.hr-value {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.hr-label {
+  font-size: 4vh;
+  font-weight: bold;
+  color: white;
+  margin-top: 1vh;
+  pointer-events: none;
+  text-align: center;
+}
+
+.hr-icon {
+  margin: 0.3vh 0;
+  font-size: 7vh;
+}
+
+.hr-box.left {
+  left: 0;
+  text-align: left;                /* content (label/value) aligned to left */
+  border-left: none;
+  border-radius: 0 2vh 0 0;
+  display: inline-flex;
+  flex-direction: column-reverse;
+  align-items: stretch;
+  gap: 1vh;
+}
+
+.hr-box.right {
+  right: 0;
+  text-align: right;               /* align content to the right edge */
+  /* direction: rtl;                  treat box content as RTL, so it expands leftwards */
+  border-right: none;
+  border-radius: 2vh 0 0 0;
+  display: inline-flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  justify-content: flex-end;
+
+}
