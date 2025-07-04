@@ -1,5 +1,5 @@
 // sw.js with cache versioning and image fallback
-const CACHE_NAME = "scoreboard-cache-v2025-06-06";
+const CACHE_NAME = "scoreboard-cache-v2025-07-04";
 
 const FILES_TO_CACHE = [
   "/",
@@ -13,6 +13,7 @@ const FILES_TO_CACHE = [
   "/icon-512.png",
   "/images/homerun1.gif",
   "/images/homerun2.gif",
+  "/images/homerun3.gif",
   "/logo/away-team-logo.png",
   "/logo/home-team-logo.png",
   "/logo/team01-logo.png",
