@@ -141,22 +141,22 @@ function resetInfoButtonTimer() {
   }, 3000);
 }
 
-// INNING box visible then fades
-setTimeout(() => {
-  const box = document.getElementById("inningBox");
-  if (inning === 0) {
-    box.classList.add("visible"); // Full opacity
-    setTimeout(() => {
-      // After 2s, fade to faint if still unused
-      if (inning === 0) {
-        box.classList.remove("visible");
-        box.classList.add("faint");
-      }
-    }, 2000);
-  }
-}, 5000); // Sync with infoButton hide
+  // INNING box visible then fades
+  setTimeout(() => {
+    const box = document.getElementById("inningBox");
+    if (inning === 0) {
+      box.classList.add("visible"); // Full opacity
+      setTimeout(() => {
+        // After 2s, fade to faint if still unused
+        if (inning === 0) {
+          box.classList.remove("visible");
+          box.classList.add("faint");
+        }
+      }, 2000);
+    }
+  }, 5000); // Sync with infoButton hide
 
-// OUT box visible then fades
+  // OUT box visible then fades
   setTimeout(() => {
     const box = document.getElementById("outBox");
     if (out === 0) {
@@ -200,10 +200,10 @@ setTimeout(() => {
 
 // Keyboard mapping for home run messages
 const keyToMessage = {
-  '=': 1, 'h': 1,
-  '-': 2, 'r': 2,
-  '0': 0, '1': 1, '2': 2, '3': 3, '4': 4,
-  '5': 5, '6': 6, '7': 7, '8': 8, '9': 9,
+  '1': 1,'=': 1, 'h': 1,
+  '2': 2,'-': 2, 'r': 2,
+  '0': 3, '3': 3,
+  '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9,
 };
 
 function displayHomeRunMessage(number) {
@@ -331,35 +331,66 @@ function decrementOut() {
 }
 
 // HR box increment/decrement and hidden (faint) at 0
+// let hr = 0; 
+
+// function updateHRDisplay(hrElement){
+//   const count = parseInt (hrElement.dataset.hr, 10);
+//   const valueElement = hrElement.querySelector(".hr-value");
+
+//     if (!valueElement) {
+//     console.warn("Missing .hr-value in", hrElement);
+//     return;
+//   }
+
+//   hrElement.classList.remove("faint","visible");
+
+  // if (count === 0) {
+  //   valueElement.innerHTML = "";
+  //   hrElement.classList.add("faint");
+  // } else {
+  //   const icons = count === 1
+  //   ? ["🥎"]
+  //   : count === 2
+  //   ? ["🥎", "🥎"]
+  //   : ["❌","🥎", "🥎"];
+
+  //   valueElement.innerHTML = icons
+  //     .map(b => `<span class="hr-icon">${b}</span>`)
+  //     .join("");
+
+  //   hrElement.classList.add("visible"); 
+  // }
+
 let hr = 0;
 
 function updateHRDisplay(hrElement){
   const count = parseInt (hrElement.dataset.hr, 10);
   const valueElement = hrElement.querySelector(".hr-value");
+  const labelElement = hrElement.querySelector(".hr-label");
 
-    if (!valueElement) {
+  if (!valueElement) {
     console.warn("Missing .hr-value in", hrElement);
     return;
   }
 
-
   hrElement.classList.remove("faint","visible");
 
   if (count === 0) {
-    valueElement.innerHTML = "";
+    labelElement.textContent = "HR";
+    valueElement.textContent = "";
     hrElement.classList.add("faint");
-  } else {
-    const icons = count === 1
-    ? ["🥎"]
-    : count === 2
-    ? ["🥎", "🥎"]
-    : ["❌","🥎", "🥎"];
-
-    valueElement.innerHTML = icons
-      .map(b => `<span class="hr-icon">${b}</span>`)
-      .join("");
-
-    hrElement.classList.add("visible"); 
+  } else if (count === 1) {
+      valueElement.textContent = "🥎";
+      labelElement.innerHTML = '<span class="hr-label" dir="ltr">HR:<br>1</span>';
+      hrElement.classList.add("visible"); 
+  } else if (count === 2) { 
+      labelElement.innerHTML = '<span class="hr-label" dir="ltr">HR:<br>2</span>';
+      valueElement.textContent = "🥎🥎";
+      hrElement.classList.add("visible"); 
+  } else{
+      labelElement.innerHTML = '<span class="hr-label" dir="ltr">HR:<br>OUT</span>';
+      valueElement.textContent = "🥎🥎❌";
+      hrElement.classList.add("visible"); 
   }
 }
 
@@ -368,8 +399,8 @@ function incrementHR(hrElement) {
   count = (count + 1) % 4; // 1-3, then rollover to 0
   hrElement.dataset.hr = count;
   updateHRDisplay(hrElement)
-  if (count  === 1 || count === 2){  // Display HR message only for HR 1 & 2.
- /*   displayHomeRunMessage(hr); */
+  if (count != 0){  // Display HR message only for HR 1 & 2.
+   displayHomeRunMessage(count); 
   }
 }
 
