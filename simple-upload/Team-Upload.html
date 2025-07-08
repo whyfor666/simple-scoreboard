@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Team Settings</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #111;
+      color: white;
+      margin: 2rem;
+      text-align: center;
+    }
+    input, button {
+      font-size: 1rem;
+      padding: 0.5rem;
+      margin-top: 0.5rem;
+      background: #222;
+      color: white;
+      border: 1px solid #444;
+    }
+    button:hover {
+      background: #333;
+    }
+    .team-entry {
+      padding: 1rem;
+      margin: 0.5rem;
+      border-radius: 6px;
+      box-sizing: border-box;
+      width: 250px;
+      flex: 0 0 auto;
+    }
+    .team-entry img, .team-entry .placeholder-box {
+      width: 100px;
+      height: 100px;
+      display: block;
+      margin: 0.5rem auto 0;
+      border: 1px solid;
+    }
+    .team-entry img {
+      object-fit: contain;
+    }
+    .placeholder-box {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      text-align: center;
+      white-space: nowrap;
+      line-height: 100px;
+    }
+    .button-row {
+      margin-top: 1rem;
+    }
+    #teamsList {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    #storageUsage {
+      margin-top: 1rem;
+    }
+    /* Modal Styles */
+    #modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6);
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+    #modal .modal-content {
+      background: #222;
+      color: white;
+      padding: 1rem;
+      border-radius: 8px;
+      max-width: 300px;
+      margin: auto;
+      text-align: center;
+      position: relative;
+    }
+    #modal.warning .modal-content {
+      background-color: #664400;
+    }
+    #modal.info .modal-content {
+      background-color: #003366;
+    }
+    #modal.error .modal-content {
+      background-color: #661111;
+    }
+    #modalIcon {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>Team Settings</h1>
+<form id="teamForm">
+  <label>Team Name:<br> <input type="text" id="teamName"></label><br>
+  <label>Team Color:<br> <input type="color" id="teamColor"></label><br>
+  <label>Team Logo:<br> <input type="file" id="teamLogo" accept="image/*"></label><br>
+  <button type="submit">Add/Update Team</button>
+</form>
+
+<div class="button-row">
+  <button id="exportBtn">Export Teams</button>
+  <input type="file" id="importFile" accept="application/json" style="display:none">
+  <button type="button" onclick="document.getElementById('importFile').click()">Import Teams</button>
+</div>
+
+<h2>Saved Teams</h2>
+<div id="storageUsage"></div>
+<div id="teamsList"></div>
+
+  <div id="modal" onclick="closeModal()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <div id="modalIcon">⚠️</div>
+      <p id="modalMessage"></p>
+      <button onclick="closeModal()">OK</button>
+    </div>
+  </div>
+
+  <script>
+    let teams = JSON.parse(localStorage.getItem('teams') || '[]');
+    let modalTimeout = null;
+
+    function showModal(message, icon = '⚠️') {
+      const modal = document.getElementById('modal');
+      const content = modal.querySelector('.modal-content');
+      modal.className = 'modal';
+      content.className = 'modal-content';
+
+      if (icon === '⚠️') modal.classList.add('warning');
+      else if (icon === 'ℹ️') modal.classList.add('info');
+      else if (icon === '❌') modal.classList.add('error');
+
+      document.getElementById('modalMessage').innerHTML = message.replace(/\n/g, '<br>');
+      document.getElementById('modalIcon').textContent = icon;
+      modal.style.display = 'flex';
+      clearTimeout(modalTimeout);
+      modalTimeout = setTimeout(closeModal, 5000);
+    }
+
+    function closeModal() {
+      document.getElementById('modal').style.display = 'none';
+    }
+
+    function saveTeams() {
+      try {
+        localStorage.setItem('teams', JSON.stringify(teams));
+      } catch (e) {
+        showModal('Storage full. 5MB max.\nTry removing large logos or reducing image size.', '❌');
+      }
+    }
+
+    function getContrastColor(hex) {
+      const r = parseInt(hex.substr(1, 2), 16);
+      const g = parseInt(hex.substr(3, 2), 16);
+      const b = parseInt(hex.substr(5, 2), 16);
+      const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+      return brightness > 125 ? 'black' : 'white';
+    }
+
+    function byteSize(str) {
+      return new TextEncoder().encode(str).length;
+    }
+
+    function renderTeams() {
+      const container = document.getElementById('teamsList');
+      const storageDisplay = document.getElementById('storageUsage');
+      container.innerHTML = '';
+      let totalBytes = 0;
+
+      teams.forEach((team, index) => {
+        const teamData = JSON.stringify(team);
+        const size = byteSize(teamData);
+        totalBytes += size;
+        const textColor = getContrastColor(team.color);
+
+        const div = document.createElement('div');
+        div.className = 'team-entry';
+        div.style.backgroundColor = team.color;
+        div.style.color = textColor;
+
+        const imageOrPlaceholder = team.logo
+          ? `<img src="${team.logo}" alt="Logo" style="border-color:${textColor}">`
+          : `<div class="placeholder-box" style="border-color:${textColor}">No file selected.</div>`;
+
+        div.innerHTML = `
+          <strong>${team.name}</strong><br>
+          Color: <span>${team.color}</span><br>
+          Size: ${(size / 1024).toFixed(2)} KB<br>
+          ${imageOrPlaceholder}<br>
+          <button onclick="deleteTeam(${index})">Delete</button>
+          <button onclick="editTeam(${index})">Edit</button>
+        `;
+        container.appendChild(div);
+      });
+
+      storageDisplay.innerHTML = `<p>Total Storage Used: ${(totalBytes / 1024).toFixed(2)} KB</p>`;
+    }
+
+    function deleteTeam(index) {
+      teams.splice(index, 1);
+      saveTeams();
+      renderTeams();
+    }
+
+    function editTeam(index) {
+      const team = teams[index];
+      document.getElementById('teamName').value = team.name;
+      document.getElementById('teamColor').value = team.color;
+      showModal(
+        'Edit values loaded for: ' + 
+        '<strong>' + team.name + '</strong>' + 
+        '\n\nLogo must be re-selected if changed.', 
+        'ℹ️'   
+      );
+    }
+
+    document.getElementById('teamForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const name = document.getElementById('teamName').value.trim();
+      const color = document.getElementById('teamColor').value;
+      const file = document.getElementById('teamLogo').files[0];
+
+      if (!name) return showModal('Team name required', '⚠️');
+
+      const existingIndex = teams.findIndex(t => t.name === name);
+
+      const handleLogo = (logoBase64) => {
+        const teamData = { name, color, logo: logoBase64 };
+        if (existingIndex >= 0) teams[existingIndex] = teamData;
+        else teams.push(teamData);
+
+        saveTeams();
+        renderTeams();
+        document.getElementById('teamForm').reset();
+      };
+
+      if (file) {
+        if (file.size > 2 * 1024 * 1024) {
+          showModal('Please upload images smaller than 2MB.', '⚠️');
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = () => handleLogo(reader.result);
+        reader.readAsDataURL(file);
+      } else {
+        const currentLogo = existingIndex >= 0 ? teams[existingIndex].logo : null;
+        handleLogo(currentLogo);
+      }
+    });
+
+    document.getElementById('exportBtn').addEventListener('click', () => {
+      const data = JSON.stringify(teams);
+      const blob = new Blob([data], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'teams-backup.json';
+      a.click();
+    });
+
+    document.getElementById('importFile').addEventListener('change', (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const parsed = JSON.parse(reader.result);
+          if (!Array.isArray(parsed)) throw new Error();
+          teams = parsed;
+          saveTeams();
+          renderTeams();
+        } catch (e) {
+          showModal('Invalid file format.\nMake sure you uploaded a valid teams-backup.json file.', '❌');
+        }
+      };
+      reader.readAsText(file);
+    });
+
+    renderTeams();
+  </script>
+</body>
+</html>
