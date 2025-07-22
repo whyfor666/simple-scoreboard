@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simple Scoreboard</title>
+  <link rel="stylesheet" href="/css/pico.min.css" />
+  <style>
+    html {
+      scroll-behavior: smooth;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: sans-serif;
+    }
+    .header-wrap {
+      position: sticky;
+      top: 0;
+      background: white;
+      z-index: 1000;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    header {
+      padding: 1rem;
+      border-bottom: 1px solid #ccc;
+    }
+    header h1,
+    header p {
+      color: #006400;
+      margin: 0;
+    }
+    nav {
+      background: #0366d6;
+      color: white;
+      padding: 0.5rem 1rem;
+      display: flex;
+      flex-wrap: wrap;
+    }
+    nav a {
+      margin-right: 1rem;
+      color: white;
+      text-decoration: none;
+      border: 2px solid transparent;
+      border-radius: 5px;
+      padding: 0.25rem 0.75rem;
+    }
+    nav a.launch-link {
+      background: white;
+      color: #0366d6;
+      font-weight: bold;
+    }
+    nav a.active {
+      border: 2px solid #006400;
+      font-weight: bold;
+    }
+    main {
+      padding: 1rem 2rem;
+      max-width: 800px;
+      margin: auto;
+    }
+    h2 {
+      background: #0366d6;
+      color: white;
+      padding: 0.75rem 1rem;
+      margin: 2rem -2rem 1rem;
+    }
+    section {
+      scroll-margin-top: 7.5rem;
+    }
+    #launch-button {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 3rem 0;
+      padding: 2rem;
+      background: #f8f9fa;
+      border: 2px solid #ddd;
+      text-align: center;
+      color: #006400;
+    }
+    #launch-button a {
+      margin-top: 1rem;
+    }
+    #launch-buffer {
+      height: calc(100vh - 7.5rem);
+    }
+    #back-to-top {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      background: #0366d6;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      text-decoration: none;
+      font-weight: bold;
+      display: none;
+      z-index: 9999;
+    }
+  </style>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const menuLinks = document.querySelectorAll('nav a[href^="#"]');
+      const sections = Array.from(document.querySelectorAll('main section'));
+      const backToTop = document.createElement('a');
+      backToTop.id = 'back-to-top';
+      backToTop.href = '#';
+      backToTop.textContent = '↑ Top';
+      document.body.appendChild(backToTop);
+
+      const updateActiveLink = () => {
+        const headerOffset = document.querySelector('.header-wrap').offsetHeight;
+        const scrollY = window.scrollY + headerOffset + 10;
+        let activeSection = sections.reduce((closest, section) => {
+          const sectionTop = section.offsetTop;
+          if (scrollY >= sectionTop - 5) return section;
+          return closest;
+        }, sections[0]);
+
+        menuLinks.forEach(link => link.classList.remove('active'));
+        if (activeSection) {
+          const activeLink = document.querySelector(`nav a[href="#${activeSection.id}"]`);
+          if (activeLink) activeLink.classList.add('active');
+        }
+      };
+
+      menuLinks.forEach(link => {
+        link.addEventListener('click', e => {
+          e.preventDefault();
+          const target = document.querySelector(link.getAttribute('href'));
+          if (target) {
+            const yOffset = document.querySelector('.header-wrap').offsetHeight;
+            const y = target.getBoundingClientRect().top + window.pageYOffset - yOffset;
+            window.scrollTo({ top: y, behavior: 'smooth' });
+          }
+        });
+      });
+
+      window.addEventListener('scroll', () => {
+        updateActiveLink();
+        backToTop.style.display = window.scrollY > 300 ? 'block' : 'none';
+      });
+
+      updateActiveLink();
+    });
+  </script>
+</head>
+<body>
+  <div class="header-wrap">
+    <header>
+      <h1>Welcome to Simple Scoreboard</h1>
+      <p>Score your softball games with ease—right from your tablet or browser.</p>
+    </header>
+    <nav>
+      <a href="#features">Features</a>
+      <a href="#howto">How to Use</a>
+      <a href="#install">Installation</a>
+      <a href="#custom">Customization</a>
+      <a href="#launch-button" class="launch-link">▶ Launch</a>
+    </nav>
+  </div>
+
+  <main>
+    <section id="features">
+      <h2>Features</h2>
+      <ul>
+        <li>Tap to score: runs, outs, innings, home runs</li>
+        <li>Custom team names, colors, logos</li>
+        <li>Offline support via PWA</li>
+        <li>Bluetooth remote trigger support</li>
+        <li>Optional score animations</li>
+      </ul>
+    </section>
+
+    <section id="howto">
+      <h2>How to Use</h2>
+      <ol>
+        <li>Edit team names by tapping them</li>
+        <li>Tap/long-press score boxes to adjust values</li>
+        <li>Inning, Out, and HR counters behave the same</li>
+        <li>Pair a Bluetooth remote to trigger features</li>
+      </ol>
+    </section>
+
+    <section id="install">
+      <h2>Installation</h2>
+      <p>Add Simple Scoreboard to your home screen:</p>
+      <ul>
+        <li><strong>Android Chrome:</strong> Menu → Add to Home Screen</li>
+        <li><strong>iOS Safari:</strong> Share → Add to Home Screen</li>
+        <li>Use it offline after first load</li>
+      </ul>
+    </section>
+
+    <section id="custom">
+      <h2>Customization</h2>
+      <p>Modify default settings via the config file or upload tool:</p>
+      <ul>
+        <li>Set max innings, labels, fade/animation settings</li>
+        <li>Add team presets with names, colors, logos</li>
+        <li>Control INNING, OUT, HR visibility and behavior</li>
+      </ul>
+    </section>
+
+    <section id="launch-button">
+      <h3>Launch Scoreboard</h3>
+      <p><strong>Version:</strong> 2025-07-17</p>
+      <p>&copy; 2025 SimpleScoreboard.ca</p>
+      <a href="/scoreboard" role="button" class="contrast">▶ Start the App</a>
+    </section>
+    <div id="launch-buffer"></div>
+  </main>
+</body>
+</html>
