@@ -48,6 +48,7 @@ html, body {
   font-weight: bold;
   cursor: pointer;
   user-select: none;
+  -webkit-text-stroke: 2px black; /* for WebKit browsers */
 }
 
 .grid-score {
@@ -87,6 +88,7 @@ select {
   cursor: text;
   z-index: 10;
   display: none;
+  border: 2px solid black;
 }
 
 select.visible {
@@ -136,9 +138,8 @@ select.visible {
   transition: opacity 1s ease;
 }
 
-#infoButton.hidden {
-  opacity: 0;
-  display: none;
+#infoButton.faint {
+  opacity: var(--faint-opacity, 0.05);
 }
 
 .overlay.tutorial {
@@ -161,8 +162,8 @@ select.visible {
 
 .tutorial-content button {
   margin-top: 1rem;
-  font-size: 1rem;
-  padding: 0.5rem 1rem;
+  font-size: 1.5rem;
+  padding: 0.5rem 2rem;
 }
 
 button, .score, .logo, .grid-name, .grid-score {
@@ -191,6 +192,8 @@ button, .score, .logo, .grid-name, .grid-score {
   transition: opacity 0.5s ease;
   opacity: 0;
   cursor:pointer;
+  opacity: var(--faint-opacity, 1);
+
 }
 
 .inning-label {
@@ -217,10 +220,12 @@ button, .score, .logo, .grid-name, .grid-score {
       z-index: 0;
       pointer-events: none;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+     -webkit-text-stroke: 1px black; /* for WebKit browsers */
+
 }
 
 .inning-box.faint {
-  opacity: 0.05 !important; /* set to 0 to fully hide it */
+  opacity: var(--faint-opacity, 0.05) !important;  /* set to 0 to fully hide it */
 }
 
 .inning-box.visible {
@@ -245,10 +250,11 @@ button, .score, .logo, .grid-name, .grid-score {
   transition: opacity 0.5s ease;
   opacity: 0;
   cursor: pointer;
+  opacity: var(--faint-opacity, 1);
 }
 
 .out-box.faint {
-  opacity: 0.05 !important; /* set to 0 to fully hide it */
+    opacity: var(--faint-opacity, 0.05) !important;  /* set to 0 to fully hide it */
 }
 
 .out-box.visible {
@@ -266,11 +272,13 @@ button, .score, .logo, .grid-name, .grid-score {
   z-index: 1;
   pointer-events: none;
   color: red;
-  text-shadow: /* for unsupported webkit browsers */
+ /* text-shadow: /* for unsupported webkit browsers */
+ /*
   -1px -1px 0 black,
    1px -1px 0 black,
   -1px  1px 0 black,
    1px  1px 0 black;
+   */
   -webkit-text-stroke: 1px black; /* for Webkit supported browsers */
 }
 
@@ -341,7 +349,7 @@ button, .score, .logo, .grid-name, .grid-score {
 } */
 
 .hr-box.faint {
-  opacity: 0.05 !important;
+  opacity: var(--faint-opacity, 0.05) !important;  /* set to 0 to fully hide it */
 }
 
 .hr-box.visible {
@@ -374,6 +382,8 @@ button, .score, .logo, .grid-name, .grid-score {
   opacity: 0;   
   pointer-events: auto;
   cursor:crosshair;
+
+  opacity: var(--faint-opacity, 1);
 }
 
 .hr-box[data-hr]:not([data-hr="0"]) {
@@ -386,11 +396,13 @@ button, .score, .logo, .grid-name, .grid-score {
   flex-direction: column;
   align-items: center;
   text-align: center;
-  text-shadow: /* for unsupported webkit browsers */
-  -1px -1px 0 black,
-   1px -1px 0 black,
-  -1px  1px 0 black,
-   1px  1px 0 black;
+  /* for unsupported webkit browsers */
+  /* text-shadow:
+  -2px -2px 0 black,
+   2px -2px 0 black,
+  -2px  2px 0 black,
+   2px  2px 0 black;
+  */
   -webkit-text-stroke: 1px black; /* for Webkit supported browsers */
 }
 
@@ -438,4 +450,31 @@ button, .score, .logo, .grid-name, .grid-score {
   flex-direction: row;
   align-items: center;
   /* justify-content: flex-end; */
+}
+
+#settingsModal, #instructionsModal {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0,0,0,0.8);
+  z-index: 3000;
+  justify-content: center;
+  align-items: center;
+}
+
+#settingsModal .tutorial-content,
+#instructionsModal .tutorial-content {
+  background-color: #222;
+  padding: 2rem;
+  border-radius: 1rem;
+  color: white;
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.inning-box, .out-box, .hr-box {
+  opacity: var(--faint-opacity, 1);
 }
