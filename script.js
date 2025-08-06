@@ -200,20 +200,24 @@ function resetInfoButtonTimer() {
 
 // Keyboard mapping for home run messages
 const keyToMessage = {
-  '0': 0, 'r': 0,
-  '1': 1, '=': 1, 
-  '2': 2, '-': 2, 
-  '3': 3, 'h': 3,
+  '0': 0, 'y': 0,
+  '1': 1, 'h': 1, 
+  '2': 2, 'r': 2, 
+  '3': 3, 'x': 3,
   '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9,
 };
 
 function displayHomeRunMessage(number) {
   const overlay = document.getElementById(`homeRunMessage${number}`);
   if (!overlay) return;
+
+  const animDuration = getStoredSettings().animationTime;
+  if (animDuration === 0) return; // Don't show animation if 0
+
   overlay.style.display = 'flex';
   setTimeout(() => {
     overlay.style.display = 'none';
-  }, 1000);  // 1000 for testing. Was 5000 [Variable to be added to settings]
+  }, animDuration * 1000);
 }
 
 document.addEventListener('keydown', (event) => {
@@ -375,34 +379,46 @@ function decrementOut() {
 
 let hr = 0;
 
-function updateHRDisplay(hrElement) {
-  const count = parseInt(hrElement.dataset.hr, 10);
-  const label = getStoredSettings().labels.hr;
+function updateHRDisplay(hrElement){
+  const count = parseInt (hrElement.dataset.hr, 10);
+  const valueElement = hrElement.querySelector(".hr-value");
+  const labelElement = hrElement.querySelector(".hr-label");
 
-  const labelElement = hrElement.querySelector('.hr-label');
-  const valueElement = hrElement.querySelector('.hr-value');
-
-  if (count === 0) {
-    labelElement.textContent = label;
-    hrElement.classList.add('faint');
-  } else {
-    labelElement.textContent = "";  // or keep if you want "HR"
-    hrElement.classList.add('visible');
-    hrElement.classList.remove('faint');
+  if (!valueElement) {
+    console.warn("Missing .hr-value in", hrElement);
+    return;
   }
 
-  const balls = "🥎".repeat(Math.min(count, 3));
-  const x = count > 2 ? "❌" : "";
-  valueElement.innerHTML = balls + x;
+  hrElement.classList.remove("faint","visible");
+
+  if (count === 0) {
+    labelElement.textContent = "HR";
+    valueElement.textContent = "";
+    hrElement.classList.add("faint");
+  } else if (count === 1) {
+      valueElement.textContent = "🥎";
+      labelElement.innerHTML = '<span class="hr-label" dir="ltr">HR:<br>1</span>';
+      hrElement.classList.add("visible"); 
+  } else if (count === 2) { 
+      labelElement.innerHTML = '<span class="hr-label" dir="ltr">HR:<br>2</span>';
+      valueElement.textContent = "🥎🥎";
+      hrElement.classList.add("visible"); 
+  } else{
+      labelElement.innerHTML = '<span class="hr-label" dir="ltr">HR:<br>OUT</span>';
+      valueElement.textContent = "🥎🥎❌";
+      hrElement.classList.add("visible"); 
+  }
 }
 
 function incrementHR(hrElement) {
   let count = parseInt(hrElement.dataset.hr, 10);
-  count = (count + 1) % 4; // 1-3, then rollover to 0
+  count = (count + 1) % 4;
   hrElement.dataset.hr = count;
-  updateHRDisplay(hrElement)
-  if (count != 0){  // Display HR message only for HR 1 & 2.
-   displayHomeRunMessage(count); 
+  updateHRDisplay(hrElement);
+
+  const settings = getStoredSettings();
+  if (settings.autoHRAnimation && count !== 0) {
+    displayHomeRunMessage(count);
   }
 }
 
@@ -417,11 +433,12 @@ function decrementHR(hrElement) {
 const defaultSettings = {
   maxInning: 7,
   faintOpacity: 0.25,
+  animationTime: 9,
   enableInning: true,
   enableOut: true,
   enableHR: true,
   autoHRAnimation: true,
-  showInfoButton: true,
+  invisibleInfoButton: false,
   labels: {
     inning: "INNING",
     out: "OUT",
@@ -437,14 +454,15 @@ function getStoredSettings() {
 function applySettingsToForm(s) {
   document.getElementById("maxInning").value = s.maxInning;
   document.getElementById("faintOpacity").value = s.faintOpacity;
+  document.getElementById("animationTime").value = s.animationTime;
   document.getElementById("enableInning").checked = s.enableInning;
   document.getElementById("enableOut").checked = s.enableOut;
   document.getElementById("enableHR").checked = s.enableHR;
   document.getElementById("autoHRAnimation").checked = s.autoHRAnimation;
-  document.getElementById("showInfoButton").checked = s.showInfoButton;
+  document.getElementById("invisibleInfoButton").checked = s.invisibleInfoButton;
   document.getElementById("labelInning").value = s.labels.inning;
   document.getElementById("labelOut").value = s.labels.out;
-  document.getElementById("labelHR").value = s.labels.hr;
+  // document.getElementById("labelHR").value = s.labels.hr;
 }
 
 function applySettingsToDOM(s) {
@@ -455,7 +473,7 @@ function applySettingsToDOM(s) {
   const outLabel = document.querySelector(".out-label");
   if (outLabel) outLabel.textContent = s.labels.out;
 
-  document.querySelectorAll(".hr-label").forEach(el => el.textContent = s.labels.hr);
+  // document.querySelectorAll(".hr-label").forEach(el => el.textContent = s.labels.hr);
 
   // Apply enable/disable logic
   document.getElementById("inningBox").style.display = s.enableInning ? "block" : "none";
@@ -465,10 +483,13 @@ function applySettingsToDOM(s) {
 
   // Info button faint logic
   const infoBtn = document.getElementById("infoButton");
-  if (infoBtn) {
-    if (!s.showInfoButton) infoBtn.classList.add("faint");
-    else infoBtn.classList.remove("faint");
-  }
+if (s.invisibleInfoButton) {
+  infoBtn.style.opacity = "0";
+  infoBtn.style.pointerEvents = "auto";  // clickable even if invisible
+} else {
+  infoBtn.style.opacity = getStoredSettings().faintOpacity ?? 0.25;
+  infoBtn.style.pointerEvents = "auto";
+}
 
   // Apply faint opacity
   const faintOpacity = s.faintOpacity;
@@ -508,18 +529,51 @@ document.getElementById("settingsForm").addEventListener("submit", (e) => {
   const s = {
     maxInning: parseInt(document.getElementById("maxInning").value),
     faintOpacity: parseFloat(document.getElementById("faintOpacity").value),
+    animationTime: parseFloat(document.getElementById("animationTime").value),
     enableInning: document.getElementById("enableInning").checked,
     enableOut: document.getElementById("enableOut").checked,
     enableHR: document.getElementById("enableHR").checked,
     autoHRAnimation: document.getElementById("autoHRAnimation").checked,
-    showInfoButton: document.getElementById("showInfoButton").checked,
+    invisibleInfoButton: document.getElementById("invisibleInfoButton").checked,
     labels: {
       inning: document.getElementById("labelInning").value,
-      out: document.getElementById("labelOut").value,
-      hr: document.getElementById("labelHR").value
+      out: document.getElementById("labelOut").value
+      // hr: document.getElementById("labelHR").value
     }
   };
   localStorage.setItem("scoreboardSettings", JSON.stringify(s));
   applySettingsToDOM(s);
   closeSettings();
+});
+
+const infoBtn = document.getElementById("infoButton");
+
+let touchingInfo = false;
+
+document.addEventListener("touchstart", (e) => {
+  const touch = e.touches[0];
+  const target = document.elementFromPoint(touch.clientX, touch.clientY);
+  touchingInfo = target === infoBtn;
+
+  if (touchingInfo && getStoredSettings().invisibleInfoButton) {
+    infoBtn.style.opacity = "1";
+  }
+});
+
+document.addEventListener("touchmove", (e) => {
+  const touch = e.touches[0];
+  const target = document.elementFromPoint(touch.clientX, touch.clientY);
+  const nowOverButton = target === infoBtn;
+
+  if (getStoredSettings().invisibleInfoButton) {
+    infoBtn.style.opacity = nowOverButton ? "1" : "0";
+  }
+
+  touchingInfo = nowOverButton;
+});
+
+document.addEventListener("touchend", () => {
+  if (getStoredSettings().invisibleInfoButton) {
+    infoBtn.style.opacity = "0";
+  }
 });

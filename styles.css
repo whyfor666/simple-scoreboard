@@ -132,10 +132,15 @@ select.visible {
   background-color: #444;
   color: white;
   border: none;
-  border-radius: 0.5rem;
+  border-radius: 5rem;
   cursor: help;
+  padding: 2rem;
   opacity: 1;
-  transition: opacity 1s ease;
+  transition: opacity 0.5s ease;
+}
+
+#infoButton:hover {
+  opacity: 1 !important;
 }
 
 #infoButton.faint {
@@ -365,11 +370,11 @@ button, .score, .logo, .grid-name, .grid-score {
   align-items: center;
   justify-content: flex-end;
 
-  min-width: 8vh;
-  min-height: 8vh;                 /* ensure a minimum box size for clicking */
+  min-width: 10vh;
+  min-height: 10vh;                 /* ensure a minimum box size for clicking */
   padding: 1vh;
   /* background-color: black; */
-  border: 2px solid yellow;
+    border: 2px solid yellow;
   border-bottom: none;
   /* Include padding/border in the min dimensions: */
   box-sizing: border-box;          /* so 8vh is the entire box, not just content box */
@@ -396,13 +401,13 @@ button, .score, .logo, .grid-name, .grid-score {
   flex-direction: column;
   align-items: center;
   text-align: center;
+
   /* for unsupported webkit browsers */
-  /* text-shadow:
-  -2px -2px 0 black,
-   2px -2px 0 black,
-  -2px  2px 0 black,
-   2px  2px 0 black;
-  */
+  text-shadow:
+  -1px -1px 0 black,
+   1px -1px 0 black,
+  -1px  1px 0 black,
+   1px  1px 0 black;
   -webkit-text-stroke: 1px black; /* for Webkit supported browsers */
 }
 
