@@ -39,21 +39,44 @@
   <div class="tutorial-content">
     <h2 style="text-align: center;">Scoreboard Settings</h2>
     <form id="settingsForm">
-      <label>Max Innings: <input type="number" id="maxInning" min="1" max="20" /></label> (1-20)<br>
-      <label>Faint Opacity: <input type="number" id="faintOpacity" step="0.05" min="0" max="1" /></label> (0.05-1)<br>
-      <label>Animation Time: <input type="number" id="animationTime" min="0" max="20" /> </label> (0-20 seconds)<br>
+      <label>Max Innings: <input type="number" id="maxInning" min="1" max="20" /></label> (1-20) [<span style="color: lime;">7</span>]<br>
+      <label>Faint Opacity: <input type="number" id="faintOpacity" step="0.05" min="0" max="1" /></label> (0.05-1) [<span style="color: lime;">0.25</span>]<br>
+      <label>Animation Time: <input type="number" id="animationTime" min="0" max="20" /> </label> (0-20 seconds) [<span style="color: lime;">9</span>]<br>
       <br>
-      <label><input type="checkbox" id="enableInning" /> Enable INNING</label><br>
-      <label><input type="checkbox" id="enableOut" /> Enable OUT</label><br>
-      <label><input type="checkbox" id="enableHR" /> Enable HR</label><br>
-      <label><input type="checkbox" id="autoHRAnimation" /> Enable HR Animation</label><br>
-      <label><input type="checkbox" id="invisibleInfoButton" /> Invisible Info Button</label><br>
+      <label><input type="checkbox" id="enableInning" /> INNING counter [<span style="color: lime;">Enabled</span>]</label><br>
+      <label><input type="checkbox" id="enableOut" /> OUT counter [<span style="color: lime;">Enabled</span>]</label><br>
+      <label><input type="checkbox" id="enableHR" /> HR counter [<span style="color: lime;">Enabled</span>]</label><br>
+      <label><input type="checkbox" id="autoHRAnimation" /> HR Animation [<span style="color: lime;">Enabled</span>]</label><br>
+      
+      <label><input type="checkbox" id="invisibleInfoButton" /> Invisible Info Button [<span style="color: lime;">Disabled</span>]</label><br>
       <br>
-      <label><input type="text" id="labelInning" /> Top-Center Label</label><br>
-      <label><input type="text" id="labelOut" /> Bottom-Center Label</label><br>
-      <!-- <label><input type="text" id="labelHR" /> Bottom-Left/Right Labels</label><br><br> -->
-      <button type="submit">Save Settings</button>
-      <button type="button" onclick="closeSettings()">Cancel</button>
+
+        <label>
+          <div class="cap-inline">
+            <input type="text" id="labelInning" maxlength="6" class="cap-inputA">
+            <span class="char-hint">(0/6)</span> Top-Center Label -- "<span style="color: lime;">INNING</span>"
+          </div>
+        </label><br>
+
+        <label>
+          <div class="cap-inline">
+            <input type="text" id="labelOut" maxlength="5" class="cap-inputA">
+            <span class="char-hint">(0/5)</span> Bottom-Center Label -- "<span style="color: lime;">OUT</span>"
+          </div>
+        </label><br>
+
+        <label>
+          <div class="cap-inline">
+              <input type="text" id="labelHR" maxlength="3" class="cap-inputA">
+              <span class="char-hint">(0/3)</span> Bottom-Left/Right Labels -- "<span style="color: lime;">HR</span>"
+          </div>
+        </label><br>
+        <br>
+        
+        <button type="submit">Save Settings</button>
+        <button type="button" onclick="closeSettings()">Cancel</button>
+        <button type="button" id="resetDefaultsBtn">Reset to [<span style="color: lime;">Defaults</span>]</button>
+      <span id="resetHint" style="display:none; color: yellow; font-size: 1rem; margin-left: 1rem;">Hold to reset</span>
     </form>
   </div>
 </div>

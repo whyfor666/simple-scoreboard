@@ -277,8 +277,52 @@ window.addEventListener("DOMContentLoaded", () => {
   }, 5000); // or your preferred delay before fading
   }
 
+    const resetHint = document.getElementById("resetHint");
+    const resetBtn = document.getElementById("resetDefaultsBtn");
+    
+    let resetTimer  ;
+
+  resetBtn.addEventListener("mousedown", (e) => {
+    if (e.button === 2) {  // Right-click
+      performResetDefaults();
+    } else {
+      // Show hint
+      resetHint.style.display = "inline";
+    }
+  })  ;
+
+  resetBtn.addEventListener("mouseup", () => {
+    resetHint.style.display = "none";
+  })  ;
+
+  resetBtn.addEventListener("mouseleave", () => {
+    resetHint.style.display = "none";
+  })  ;
+
+  resetBtn.addEventListener("touchstart", () => {
+    resetTimer = setTimeout(() => {
+      performResetDefaults();
+    }, 1500); // Long press = 1.5s
+  })  ;
+
+  resetBtn.addEventListener("touchend", () => {
+    clearTimeout(resetTimer);
+    resetHint.style.display = "none";
+  })  ;
+
+  resetBtn.addEventListener("click", () => {
+    // Normal tap/click should NOT trigger reset, just show hint
+    resetHint.style.display = "inline";
+    setTimeout(() => resetHint.style.display = "none", 2000);
+  })  ;
+
   applySettingsToForm(getStoredSettings());  // <-- ensure checkboxes and fields are pre-filled
   applySettingsToDOM(getStoredSettings());   // <- apply visuals immediately on load
+
+
+  attachCharHints();
+
+
 });
 
 // INNING box increment/decrement and hidden (faint) at 0
@@ -462,7 +506,7 @@ function applySettingsToForm(s) {
   document.getElementById("invisibleInfoButton").checked = s.invisibleInfoButton;
   document.getElementById("labelInning").value = s.labels.inning;
   document.getElementById("labelOut").value = s.labels.out;
-  // document.getElementById("labelHR").value = s.labels.hr;
+  document.getElementById("labelHR").value = s.labels.hr;
 }
 
 function applySettingsToDOM(s) {
@@ -473,7 +517,7 @@ function applySettingsToDOM(s) {
   const outLabel = document.querySelector(".out-label");
   if (outLabel) outLabel.textContent = s.labels.out;
 
-  // document.querySelectorAll(".hr-label").forEach(el => el.textContent = s.labels.hr);
+  document.querySelectorAll(".hr-label").forEach(el => el.textContent = s.labels.hr);
 
   // Apply enable/disable logic
   document.getElementById("inningBox").style.display = s.enableInning ? "block" : "none";
@@ -483,26 +527,82 @@ function applySettingsToDOM(s) {
 
   // Info button faint logic
   const infoBtn = document.getElementById("infoButton");
-if (s.invisibleInfoButton) {
-  infoBtn.style.opacity = "0";
-  infoBtn.style.pointerEvents = "auto";  // clickable even if invisible
-} else {
-  infoBtn.style.opacity = getStoredSettings().faintOpacity ?? 0.25;
-  infoBtn.style.pointerEvents = "auto";
+  if (s.invisibleInfoButton) {
+    infoBtn.style.opacity = "0";
+    infoBtn.style.pointerEvents = "auto";  // clickable even if invisible
+  } else {
+    infoBtn.style.opacity = getStoredSettings().faintOpacity ?? 0.25;
+    infoBtn.style.pointerEvents = "auto";
+  }
+
+    // Apply faint opacity
+    const faintOpacity = s.faintOpacity;
+    document.querySelectorAll('.inning-box, .out-box, .hr-box, #infoButton').forEach(el => {
+    el.style.setProperty('--faint-opacity', faintOpacity);
+  });
 }
 
-  // Apply faint opacity
-  const faintOpacity = s.faintOpacity;
-  document.querySelectorAll('.inning-box, .out-box, .hr-box, #infoButton').forEach(el => {
-  el.style.setProperty('--faint-opacity', faintOpacity);
-});
+// function performResetDefaults() {
+//   localStorage.removeItem("scoreboardSettings");
+//   applySettingsToForm(defaultSettings);
+//   applySettingsToDOM(defaultSettings);
+//   // closeSettings();
+//   alert("Settings were reset to [default] values.");
+// }
 
-}
+function performResetDefaults() {
+  // capture current form values before reset
+  const changedEls = [];
+  const sBefore = getStoredSettings();
 
-function openSettings() {
-  const s = getStoredSettings();
-  applySettingsToForm(s);
-  document.getElementById("settingsModal").style.display = "flex";
+  localStorage.removeItem("scoreboardSettings");
+  applySettingsToForm(defaultSettings);
+  applySettingsToDOM(defaultSettings);
+  // closeSettings();
+
+  // compare & mark changed inputs (numbers, text, checkboxes)
+  const map = {
+    maxInning: defaultSettings.maxInning,
+    faintOpacity: defaultSettings.faintOpacity,
+    animationTime: defaultSettings.animationTime,
+    enableInning: defaultSettings.enableInning,
+    enableOut: defaultSettings.enableOut,
+    enableHR: defaultSettings.enableHR,
+    autoHRAnimation: defaultSettings.autoHRAnimation,
+    invisibleInfoButton: defaultSettings.invisibleInfoButton,
+    labelInning: defaultSettings.labels.inning,
+    labelOut: defaultSettings.labels.out,
+    labelHR: defaultSettings.labels.hr
+  };
+
+  Object.entries(map).forEach(([id, defVal]) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+
+    const was = (id in sBefore.labels)
+      ? sBefore.labels[id] // labelInning/labelOut/labelHR path
+      : sBefore[id];
+
+    // normalize checkbox vs input
+    const changed = el.type === 'checkbox' ? (was !== el.checked) : (String(was) !== String(el.value));
+    if (changed) {
+      el.classList.add('input-flash');
+      changedEls.push(el);
+    }
+  });
+
+  // after flash, add strong highlight for a few seconds
+  setTimeout(() => {
+    changedEls.forEach(el => {
+      el.classList.remove('input-flash');
+      el.classList.add('input-changed');
+    });
+    setTimeout(() => {
+      changedEls.forEach(el => el.classList.remove('input-changed'));
+    }, 4000);
+  }, 1000);
+
+  // alert("Settings reset to defaults.");
 }
 
 function closeSettings() {
@@ -522,6 +622,8 @@ document.getElementById("infoButton").addEventListener("click", () => {
 document.getElementById("infoButton").addEventListener("contextmenu", (e) => {
   e.preventDefault();
   openSettings();
+  attachCharHints();
+
 });
 
 document.getElementById("settingsForm").addEventListener("submit", (e) => {
@@ -537,8 +639,8 @@ document.getElementById("settingsForm").addEventListener("submit", (e) => {
     invisibleInfoButton: document.getElementById("invisibleInfoButton").checked,
     labels: {
       inning: document.getElementById("labelInning").value,
-      out: document.getElementById("labelOut").value
-      // hr: document.getElementById("labelHR").value
+      out: document.getElementById("labelOut").value,
+      hr: document.getElementById("labelHR").value
     }
   };
   localStorage.setItem("scoreboardSettings", JSON.stringify(s));
@@ -577,3 +679,39 @@ document.addEventListener("touchend", () => {
     infoBtn.style.opacity = "0";
   }
 });
+
+
+function escapeHTML(s) {
+  return s.replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+}
+
+// Optional: if you populate the form when opening settings, refresh then too
+function openSettings() {
+  const s = getStoredSettings();
+  applySettingsToForm(s);
+  document.getElementById("settingsModal").style.display = "flex";
+}
+function attachCharHints() {
+  const pairs = [
+    { inputId: 'labelInning' },
+    { inputId: 'labelOut'    },
+    { inputId: 'labelHR'     },
+  ];
+
+  pairs.forEach(({ inputId }) => {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+
+    const hint = input.parentElement?.querySelector('.char-hint');
+    if (!hint) return;
+
+    const max = input.maxLength > 0 ? input.maxLength : 0;
+
+    const update = () => {
+      hint.textContent = `(${input.value.length}/${max})`;
+    };
+
+    input.addEventListener('input', update);
+    update();
+  });
+}

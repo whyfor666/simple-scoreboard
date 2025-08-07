@@ -483,3 +483,86 @@ button, .score, .logo, .grid-name, .grid-score {
 .inning-box, .out-box, .hr-box {
   opacity: var(--faint-opacity, 1);
 }
+
+/* visible width in characters */
+#settingsForm input[type="text"],
+#settingsForm input[type="number"] {
+  width: 8ch; /* tweak per field with IDs below */
+  font-size: 1.2rem;
+  padding: 0.25rem 0.4rem;
+}
+
+#labelInning, #labelOut, #labelHR { width: 6ch; } /* OUT, INNING short */
+#animationTime, #faintOpacity, #maxInning { width: 5ch; }
+
+#settingsForm input[type="checkbox"] {
+  width: 1.4rem;
+  height: 1.4rem;
+}
+
+#resetDefaultsBtn {
+  background-color: darkred;
+  color: white;
+  border: 2px solid white; /* add border */
+  font-size: 1.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+/* #resetDefaultsBtn:hover { filter: brightness(1.05); } */
+
+/* quick pulse */
+.input-flash {
+  animation: flash-bg 0.5s linear 10;
+}
+@keyframes flash-bg {
+  0%,100% { background-color: transparent; }
+  50%     { background-color: rgba(255,255,0,0.7); }
+}
+
+/* temporary emphasis after flashing */
+.input-changed {
+  outline: 2px solid #2ecc71;
+  font-weight: 700;
+  color: #2ecc71;
+}
+
+#settingsForm input::placeholder {
+  color: rgba(0, 0, 0, 0.3); /* adjust for dark/light theme */
+}
+
+/* --- Input + counter chip (Option A) --- */
+:root { --input-ch: 12; } /* all three inputs share the same width */
+
+.cap-inline {
+  display: inline-flex;
+  align-items: stretch;           /* match heights */
+  font-variant-numeric: tabular-nums; /* keeps numbers steady */
+}
+
+.cap-inputA {
+  width: calc(var(--input-ch) * 1ch);
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #ccc;
+  border-right: none;             /* merge with counter */
+  border-radius: 0.5rem 0 0 0.5rem;
+  line-height: 1.2;
+  font-family: monospace;         /* optional: keep character grid tidy */
+}
+
+.char-hint {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 5.5ch;               /* room for (10/10) */
+  padding: 0 0.5rem;
+  border: 1px solid #ccc;
+  border-left: none;              /* merge with input */
+  border-radius: 0 0.5rem 0.5rem 0;
+  background: #f5f5f5;
+  color: #666;                    /* ~80% gray */
+  line-height: 1.2;
+  font-family: monospace;         /* matches input if you set it */
+}
