@@ -566,3 +566,15 @@ button, .score, .logo, .grid-name, .grid-score {
   line-height: 1.2;
   font-family: monospace;         /* matches input if you set it */
 }
+
+.tutorial-buttons {
+    display: flex;
+    justify-content: center; /* horizontal */
+    margin-top: 20px;         /* spacing from text */
+    gap: 10px; /* space between buttons */
+   /* margin: 0 5px; /* left/right space around each button */
+}
+
+#tutorialOverlay button {
+    margin: 0 5px; /* 5px on left/right */
+}

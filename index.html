@@ -7,7 +7,7 @@
 
   <!-- Manifest and Theme -->
   <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#000000">
+  <meta name="theme-color" content="#000000">  
 
   <!-- External Stylesheet -->
   <link rel="stylesheet" href="styles.css">
@@ -16,7 +16,11 @@
 <!-- Info Instructions Modal -->
 <div id="instructionsModal" class="overlay tutorial">
   <div class="tutorial-content">
-    <h1 style="text-align: center;">Simple Scoreboard<br>Quick Tutorial</h1>
+    <span style="text-align: center;">
+      <h1><a href="https://simplescoreboard.ca">SimpleScoreboard.ca</a></h1>
+      <h3>Version: 2025-08-08</h3>
+      <h1>Quick Tutorial</h1>
+    </span>
     <ul>
       <li>Tap team name to change it</li>
       <li>Tap team logo to begin scoring</li>
@@ -28,9 +32,11 @@
       <li>Mouse Right-click = Long-press</li>
       <li>HR Animation keys: 0–3</li>
     </ul>
-    <button onclick="closeInstructions()">Got it</button>
+    <div class="tutorial-buttons">
+    <button onclick="closeInstructions()">Close</button>
     <button onclick="openSettings()">Open Settings</button>
-    <p style="font-size: 1rem; margin-top: 0.5rem; text-align: center;">(Tip: Hold [⚙Info?] to go directly to settings)</p>
+    </div>
+    <p style="font-size: 1rem; margin-top: 0.5rem; text-align: center;">Tip: Hold [⚙Info?] to go directly to Settings</p>
   </div>
 </div>
 
@@ -39,16 +45,16 @@
   <div class="tutorial-content">
     <h2 style="text-align: center;">Scoreboard Settings</h2>
     <form id="settingsForm">
-      <label>Max Innings: <input type="number" id="maxInning" min="1" max="20" /></label> (1-20) [<span style="color: lime;">7</span>]<br>
-      <label>Faint Opacity: <input type="number" id="faintOpacity" step="0.05" min="0" max="1" /></label> (0.05-1) [<span style="color: lime;">0.25</span>]<br>
-      <label>Animation Time: <input type="number" id="animationTime" min="0" max="20" /> </label> (0-20 seconds) [<span style="color: lime;">9</span>]<br>
+      <label>Max Innings: <input type="number" id="maxInning" min="1" max="20" /></label> (1-20) -- Default is <span style="color: lime;">7</span><br>
+      <label>Faint Opacity: <input type="number" id="faintOpacity" step="0.05" min="0" max="1" /></label> (0.05-1) -- Default is <span style="color: lime;">0.25</span><br>
+      <label>Animation Time: <input type="number" id="animationTime" min="0" max="20" /> </label> (0-20 seconds) -- Default is <span style="color: lime;">9</span><br>
       <br>
-      <label><input type="checkbox" id="enableInning" /> INNING counter [<span style="color: lime;">Enabled</span>]</label><br>
-      <label><input type="checkbox" id="enableOut" /> OUT counter [<span style="color: lime;">Enabled</span>]</label><br>
-      <label><input type="checkbox" id="enableHR" /> HR counter [<span style="color: lime;">Enabled</span>]</label><br>
-      <label><input type="checkbox" id="autoHRAnimation" /> HR Animation [<span style="color: lime;">Enabled</span>]</label><br>
+      <label><input type="checkbox" id="enableInning" /> "INNING" counter -- Default is <span style="color: lime;">Enabled</span></label><br>
+      <label><input type="checkbox" id="enableOut" /> "OUT" counter -- Default is <span style="color: lime;">Enabled</span></label><br>
+      <label><input type="checkbox" id="enableHR" /> "HR" counter -- Default is <span style="color: lime;">Enabled</span></label><br>
+      <label><input type="checkbox" id="autoHRAnimation" /> "HR" Animation -- Default is <span style="color: lime;">Enabled</span></label><br>
       
-      <label><input type="checkbox" id="invisibleInfoButton" /> Invisible Info Button [<span style="color: lime;">Disabled</span>]</label><br>
+      <label><input type="checkbox" id="invisibleInfoButton" /> Invisible Info Button -- Default is <span style="color: lime;">Disabled</span></label><br>
       <br>
 
         <label>
@@ -74,8 +80,8 @@
         <br>
         
         <button type="submit">Save Settings</button>
-        <button type="button" onclick="closeSettings()">Cancel</button>
-        <button type="button" id="resetDefaultsBtn">Reset to [<span style="color: lime;">Defaults</span>]</button>
+        <button type="button" onclick="closeSettings()">Close</button>
+        <button type="button" id="resetDefaultsBtn">Hold to reset to <br><span style="color: lime;">defaults</span></button>
       <span id="resetHint" style="display:none; color: yellow; font-size: 1rem; margin-left: 1rem;">Hold to reset</span>
     </form>
   </div>
@@ -83,7 +89,7 @@
 
 <!-- Buttons -->
 <button id="infoButton">⚙<br>Info<br>?</button>
-<button id="installButton" style="display:none;">Install App</button>
+<button id="installButton" style= "display:none;">Install App</button>
 
 <!-- Home Run Overlays -->
 <div id="homeRunOverlays">
