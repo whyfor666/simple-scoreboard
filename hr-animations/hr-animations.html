@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>HR Animations</title>
+  <link rel="stylesheet" href="hr-animations.css" />
+</head>
+<body>
+  <header class="appbar">
+    <h1>Home Run Animations</h1>
+    <nav>
+      <a class="btn" href="scoreboard.html">🏟 Back to Scoreboard</a>
+      <a class="btn" href="settings.html">⚙ Settings</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <p class="hint">Tap an animation to edit. Long‑press “Reset” to restore default.</p>
+
+    <section id="grid" class="grid"></section>
+  </main>
+
+  <!-- Editor Modal -->
+  <dialog id="editor">
+    <form method="dialog" class="editor">
+      <header class="editor-head">
+        <h2>Edit Animation <span id="editorSlot"></span></h2>
+      </header>
+
+      <div class="editor-body">
+        <div class="preview-wrap">
+          <div id="livePreview" class="live-preview">
+            <span id="liveText" class="live-text">Go Team</span>
+            <img id="liveImage" alt="" />
+          </div>
+          <small class="note">Preview (image overrides message/background)</small>
+        </div>
+
+        <div class="fields">
+          <label class="field">
+            <span>Message</span>
+            <input id="fMessage" type="text" maxlength="60" placeholder="Go Team" />
+          </label>
+
+          <label class="field">
+            <span>Background</span>
+            <input id="fBg" type="color" />
+          </label>
+
+          <label class="field">
+            <span>Upload Image (optional)</span>
+            <input id="fImage" type="file" accept="image/*" />
+          </label>
+
+          <div class="actions-row">
+            <button id="btnSave" class="btn primary" value="save">Save</button>
+            <button id="btnCancel" class="btn" value="cancel">Cancel</button>
+            <button id="btnReset" class="btn danger hold">Hold to Reset</button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </dialog>
+
+  <template id="cardTpl">
+    <div class="card">
+      <div class="card-top">
+        <div class="thumb" data-slot="">
+          <span class="thumb-text"></span>
+          <img class="thumb-img" alt="" />
+        </div>
+      </div>
+      <div class="card-bottom">
+        <div class="meta">
+          <span class="slot">#0</span>
+        </div>
+        <div class="row">
+          <button class="btn small edit">Edit</button>
+          <button class="btn small danger hold reset">Hold to Reset</button>
+        </div>
+      </div>
+    </div>
+  </template>
+
+  <script src="hr-animations.js"></script>
+</body>
+</html>
