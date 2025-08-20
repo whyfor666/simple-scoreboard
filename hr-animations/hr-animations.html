@@ -8,12 +8,13 @@
 </head>
 <body>
   <header class="appbar">
-    <h1>Home Run Animations</h1>
-    <nav>
-      <a class="btn" href="scoreboard.html">🏟 Back to Scoreboard</a>
-      <a class="btn" href="settings.html">⚙ Settings</a>
-    </nav>
-  </header>
+  <h1>HR Animations</h1>
+  <p class="app-instructions">Tap to edit · Long‑press to preview</p>
+  <nav>
+    <a class="btn" href="scoreboard.html">🏟 Back to Scoreboard</a>
+    <a class="btn" href="settings.html">⚙ Settings</a>
+  </nav>
+</header>
 
   <main class="container">
     <!-- <p class="hint">Tap an animation to edit.</p> -->
@@ -97,32 +98,30 @@
         <span class="thumb-text"></span>
         <img class="thumb-img" alt="" />
         <img class="thumb-mini" alt="" />
-      </div>  
-
-      </div>
-      <div class="card-bottom">
-        <div class="meta">
-        </div>
-        <div class="row">
-          <span class="slot">#0</span>
-          <button class="btn small edit">Edit</button>
-          <button class="btn small danger hold reset">Hold to Reset to Defaults</button>
-        </div>
+        </div>  
       </div>
     </div>
   </template>
 
-  <script src="hr-animations.js"></script>
-
-<!-- Minimum display spec requiement -->
-<div id="specOverlay" style="display:none" class="spec-overlay">
-  <div class="spec-card">
-    <h3>Sorry — minimum size required</h3>
-    <p>This screen needs at least <strong>1024×600</strong> in <strong>landscape</strong> to work well.</p>
-    <p>Rotate your device or use a larger display.</p>
+  
+  <!-- Minimum display spec requiement -->
+  <div id="specOverlay" style="display:none" class="spec-overlay">
+    <div class="spec-card">
+      <h3>Sorry — minimum size required</h3>
+      <p>This screen needs at least <strong>1024×600</strong> in <strong>landscape</strong> to work well.</p>
+      <p>Rotate your device or use a larger display.</p>
+    </div>
   </div>
-</div>
-
+  
+  <!-- Fullscreen preview overlay -->
+  <div id="fsPreview" class="fs">
+    <div class="fs-stage" id="fsStage">
+      <img id="fsImg" alt="">
+      <span id="fsText"></span>
+    </div>
+  </div>
+  
+  <script src="hr-animations.js"></script>
 
 </body>
 </html>

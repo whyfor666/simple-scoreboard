@@ -26,7 +26,6 @@ body{
   padding:12px 16px; background:var(--surface); border-bottom:1px solid #2a2c31;
   position:sticky; top:0; z-index:10; 
   */
-  
   min-height: var(--appbar-h); 
   }
 
@@ -36,7 +35,7 @@ body{
 .thumb .thumb-img  { z-index: 1; }
 .thumb .thumb-text { z-index: 2; }
 
-h1{font-size:1.1rem; margin:0}
+h1{font-size:4vh; margin:2vh}
 nav{display:flex; gap:8px}
 
 .hint { color:#eef1f4; }
@@ -77,6 +76,10 @@ nav{display:flex; gap:8px}
   justify-content: center;
 
   display:flex; align-items:center; justify-content:center;
+
+  /* Helps mobile avoid extra gesture delays */
+  .thumb { touch-action: manipulation; }
+  
 }
 
 /* This keeps the thumbnail proportions within the thumbnail page */
@@ -90,12 +93,34 @@ nav{display:flex; gap:8px}
   background: #fff;
 } 
 
-.thumb { position: relative; width:100%; aspect-ratio:16/9; border-radius:12px; overflow:hidden; }
-.thumb .thumb-img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:none; }
-.thumb .thumb-text { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; }
-.thumb .thumb-text.over-image {
-  color:#fff !important; background:rgba(0,0,0,.3);
-  padding:.25em .5em; border-radius:10px; text-shadow:0 2px 4px rgba(0,0,0,.6);
+/* Number badge on top-left of the thumbnail */
+.thumb::before {
+  content: attr(data-slotnum);
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  font-size: 2rem;
+  line-height: 1;
+  background: rgba(0,0,0,.55);
+  color: #fff;
+  padding: 4px 6px;
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,.25);
+  z-index: 3; /* above image/text */
+}
+
+/* Mini preview stays bottom-right */
+.thumb .thumb-mini {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  width: 4rem;
+  height: auto;
+  border: 1px solid rgba(255,255,255,.5);
+  border-radius: 4px;
+  box-shadow: 0 2px 6px rgba(0,0,0,.5);
+  background: #222;
+  z-index: 3;
 }
 
 /* editor mini preview overrides. */
@@ -104,11 +129,6 @@ nav{display:flex; gap:8px}
   display: inline-block;
   width: 48px;
   height: 32px;
-}
-
-/* This is the mini image inside the thumbnail images */
-.mini-info {
-  position: relative;       /* make container positioning context */
 }
 
 .thumb-mini {
@@ -121,21 +141,34 @@ nav{display:flex; gap:8px}
   background: #fff;
 }
 
+.thumb { position: relative; width:100%; aspect-ratio:16/9; border-radius:12px; overflow:hidden; }
+.thumb .thumb-img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:none; }
+.thumb .thumb-text { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; }
+.thumb .thumb-text.over-image {
+  color:#fff !important; background:rgba(0,0,0,.3);
+  padding: 0.25em .5em; border-radius:10px; text-shadow:0 2px 4px rgba(0,0,0,.6);
+}
+
+/* This is the mini image inside the thumbnail images */
+.mini-info {
+  position: relative;       /* make container positioning context */
+}
+
 .card-top{padding:10px 10px 0}
 .card-bottom{padding:10px}
-.meta{font-size:.85rem; color:var(--muted); margin-bottom:8px}
+.meta{font-size: 0.85rem; color:var(--muted); margin-bottom:8px}
 .row{display:flex; gap:8px}
 .btn{
   appearance:none; border:1px solid #2a2c31; background:#23252a; color:var(--fg);
   padding:8px 12px; border-radius:10px; cursor:pointer
 }
-.btn.small{padding:6px 10px; font-size:.9rem}
+.btn.small{padding:6px 10px; font-size:0.9rem}
 .btn.primary{background:var(--primary); border-color:transparent}
 .btn.danger{background:#990000; border-color:#4a2323; color:#f7d7d7}
 .btn:active{transform:translateY(1px)}
 
 .badge{
-  font-size:.9rem; padding:4px 8px; border-radius:999px;
+  font-size:0.9rem; padding:4px 8px; border-radius:999px;
   background:#3a1d1d; color:#f7d7d7; border:1px solid #4a2323;
 }
 
@@ -143,7 +176,7 @@ nav{display:flex; gap:8px}
 dialog::backdrop{background:rgba(0,0,0,.6)}
 dialog{border:none; padding:0; background:transparent}
 .editor{
-  width:min(900px,95vw); background:var(--surface); border:1px solid #2a2c31; border-radius:20px; overflow:hidden
+  width:min(900px,95vw); background:var(--surface); border:10px solid #7e7e7e; border-radius:20px; overflow:hidden
 }
 .editor-head{
   padding:14px 16px; border-bottom:1px solid #2a2c31; display:flex; align-items:center; justify-content:space-between
@@ -186,14 +219,14 @@ dialog{border:none; padding:0; background:transparent}
 
 .live-text{
   position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
-  font-size:clamp(20px,4vw,48px); font-weight:800; text-align:center; padding:.25em .5em;
+  font-size:clamp(20px,4vw,48px); font-weight:800; text-align:center; padding: 0.25em .5em;
   border-radius:12px; text-shadow:0 2px 4px rgba(0,0,0,.5);
 }
 /* Readable overlay when text is on top of an image */
 .live-text.over-image{
   color:#fff !important;
   background:rgba(0,0,0,.35);  
-  padding:.35em .6em;
+  padding: 0.35em .6em;
   border-radius:12px;
   text-shadow:0 2px 4px rgba(0,0,0,.6);
 }
@@ -226,6 +259,43 @@ dialog{border:none; padding:0; background:transparent}
 
 .fieldset { border:0; padding:0; margin:0 }
 fieldset label { display:inline-flex; gap:6px; align-items:center; margin-right:12px }
+/* Fullscreen preview */
+.fs{
+  position:fixed; inset:0; display:none;
+  align-items:center; justify-content:center;
+  background:rgba(0,0,0,.85);
+  z-index: 10000;
+  cursor: zoom-out; /* tap/click to close */
+}
+.fs.show{ display:flex; }
+
+.fs-stage{
+  position:relative;
+  width:min(92vw, 92vh * (16/9));
+  aspect-ratio:16 / 9;
+  border-radius:16px;
+  overflow:hidden;
+  background:#000; /* will be replaced with slot.bg */
+  border:1px solid rgba(255,255,255,.15);
+}
+
+/* mirror the EDITOR preview behavior */
+.fs-stage img{
+  position:absolute; inset:0; width:100%; height:100%;
+  object-fit: cover;         /* SAME as editor */
+  display:none; z-index:1;
+}
+.fs-stage span{
+  position:absolute; inset:0; display:flex;
+  align-items:center; justify-content:center;
+  font-size:clamp(24px, 6vw, 64px); font-weight:800; text-align:center;
+  color:#fff; text-shadow:0 2px 6px rgba(0,0,0,.7);
+  z-index:2;
+}
+.fs-stage span.over-image{
+  background:rgba(0,0,0,.35);
+  padding:.35em .6em; border-radius:12px;
+}
 
 /* Minimum display spec notice */
 .spec-overlay{
@@ -235,4 +305,56 @@ fieldset label { display:inline-flex; gap:6px; align-items:center; margin-right:
 .spec-card{
   background:#1e2024; color:#fff; padding:20px 24px; border-radius:14px;
   border:1px solid #2a2c31; max-width:520px; text-align:center;
+}
+
+/* Appbar: title left, instructions center, buttons right */
+.appbar{
+  display:flex; align-items:center; justify-content:space-between;
+  gap: 12px;
+  padding:12px 16px;
+  background:var(--surface);
+  border-bottom:1px solid #2a2c31;
+  position:sticky; top:0; z-index:10;
+}
+.appbar h1{ margin:0; font-size:4rem }
+.app-instructions{
+  margin:0; flex:1; text-align:center;
+  color:#cbd1d6; font-size:2rem;
+}
+
+/* Fullscreen preview */
+.fs{
+  position:fixed; inset:0; display:none;
+  align-items:center; justify-content:center;
+  background:rgba(0,0,0,.85);
+  z-index: 10000;
+  cursor: zoom-out; /* hint: click to close */
+}
+.fs.show{ display:flex; }
+.fs-stage{
+  position:relative;
+  width:min(92vw, 92vh * (16/9));
+  aspect-ratio:16 / 9;
+  border-radius:16px;
+  overflow:hidden;
+  background:#000; /* will be overridden by slot.bg */
+  border:1px solid rgba(255,255,255,.15);
+}
+.fs-stage img{
+  position:absolute; inset:0; width:100%; height:100%;
+  object-fit: contain; /* show full image/GIF without cropping */
+  display:none;
+  z-index:1;
+}
+.fs-stage span{
+  position:absolute; inset:0;
+  display:flex; align-items:center; justify-content:center;
+  font-size:clamp(24px, 6vw, 64px);
+  font-weight:800; text-align:center;
+  color:#fff; text-shadow:0 2px 6px rgba(0,0,0,.7);
+  z-index:2;
+}
+.fs-stage span.over-image{
+  background:rgba(0,0,0,.35);
+  padding: 0.35em .6em; border-radius:12px;
 }

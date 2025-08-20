@@ -94,6 +94,12 @@ const modeImage   = document.getElementById('modeImage');
 const modeBoth    = document.getElementById('modeBoth');
 const fTextAnim   = document.getElementById('fTextAnim');
 
+const fs       = document.getElementById('fsPreview');
+const fsStage  = document.getElementById('fsStage');
+const fsImg    = document.getElementById('fsImg');
+const fsText   = document.getElementById('fsText');
+
+
 /* ---------- App ---------- */
 let state = loadAnimations();
 let editingIndex = null;
@@ -108,40 +114,78 @@ function render(){
     const tText = node.querySelector('.thumb-text');
     const tImg  = node.querySelector('.thumb-img');
     const tMini = node.querySelector('.thumb-mini');
-    const slotLbl = node.querySelector('.slot');
-    const btnEdit = node.querySelector('.edit');
-    const btnResetCard = node.querySelector('.reset');
 
-    slotLbl.textContent = `#${idx}`;
+    // data attributes for CSS badge and bookkeeping
     thumb.dataset.slot = String(idx);
+    thumb.dataset.slotnum = `#${idx+1}`;
+
+    // tap thumbnail to edit
+    thumb.addEventListener('click', () => openEditor(idx));
+
+    // Long‑press to preview (reusing your hold helper)
+    function applyHoldToPreview(el, onConfirm){
+  let t = null, fired = false;
+  const HOLD_MS = 550; // feel closer to “native” long‑press
+
+  // suppress the next click anywhere (captures at document level)
+  function suppressOnce(e){
+    document.removeEventListener('click', suppressOnce, true);
+    if (fired) { e.preventDefault(); e.stopPropagation(); }
+    fired = false; // reset
+  }
+
+  const start = () => {
+    if (t) return;
+    fired = false;
+    t = setTimeout(() => {
+      t = null;
+      fired = true;
+      document.addEventListener('click', suppressOnce, true); // eat the ghost click
+      onConfirm();
+    }, HOLD_MS);
+  };
+
+  const end = () => { if (t) { clearTimeout(t); t = null; } };
+
+  el.addEventListener('pointerdown', start);
+  el.addEventListener('pointerup', end);
+  el.addEventListener('pointercancel', end);
+  el.addEventListener('pointerleave', end);
+}
+
+  // Right‑click to preview (desktop)
+  thumb.addEventListener('click', ()=> openEditor(idx));            // tap = edit
+  applyHoldToPreview(thumb, ()=> openFullscreenPreview(state[idx])); // hold = preview
+  thumb.addEventListener('contextmenu', e=>{ e.preventDefault(); openFullscreenPreview(state[idx]); });
 
     const showMsg = (slot.mode==='message' || slot.mode==='both');
     const showImg = (slot.mode==='image'   || slot.mode==='both');
 
     // image + mini
-    if(slot.img){ tImg.src = slot.img; tMini.src = slot.img; tMini.style.display = 'block'; }
-    else { tMini.style.display = 'none'; }
+    if (slot.img) {
+      tImg.src = slot.img;
+      tMini.src = slot.img;
+      tMini.style.display = 'block';
+    } else {
+      tMini.style.display = 'none';
+    }
 
-    // background color logic: show BG when no real image (placeholder counts as "no image")
+    // treat white placeholder as "no real image" for BG color
     const isWhitePlaceholder = !!slot.img && slot.img === PLACEHOLDER_WHITE_IMG;
 
     if (!slot.img || isWhitePlaceholder) {
-      // No real image -> show the saved BG color (blue/yellow/etc.)
       thumb.style.background = slot.bg || DEFAULT_BG;
       tImg.style.display = 'none';
     } else {
-      // Real image present
       thumb.style.background = '#111';
       tImg.style.display = showImg ? 'block' : 'none';
     }
-    // Overlay text (Both) readability on top of image text
+
+    // text overlay
     tText.textContent = slot.message || DEFAULT_MESSAGE;
     tText.style.color = contrastText(slot.bg || DEFAULT_BG);
     tText.style.display = showMsg ? 'flex' : 'none';
     tText.classList.toggle('over-image', showImg && showMsg && !!slot.img && !isWhitePlaceholder);
-
-    btnEdit.addEventListener('click', ()=> openEditor(idx));
-    applyHoldToReset(btnResetCard, ()=> resetSlot(idx));
 
     gridEl.appendChild(node);
   });
@@ -236,14 +280,26 @@ function refreshLivePreview(slot){
 
 /* Long-press helper */
 function applyHoldToReset(el, onConfirm){
-  let t=null; const HOLD_MS=900;
-  const start=()=>{ if(t) return; t=setTimeout(()=>{ t=null; onConfirm(); }, HOLD_MS); };
-  const end=()=>{ if(t){ clearTimeout(t); t=null; } };
+  let t = null;
+  const HOLD_MS = 900;
+  const start = () => {
+    if (t) return;
+    t = setTimeout(() => {
+      t = null;
+      // mark this element as having triggered a long-press
+      el.dataset.longpress = '1';
+      onConfirm();
+      // clear the marker shortly after to allow future normal clicks
+      setTimeout(() => { delete el.dataset.longpress; }, 300);
+    }, HOLD_MS);
+  };
+  const end = () => { if (t) { clearTimeout(t); t = null; } };
   el.addEventListener('mousedown', start);
-  el.addEventListener('touchstart', start);
+  el.addEventListener('touchstart', start, { passive: true });
   el.addEventListener('mouseup', end);
   el.addEventListener('mouseleave', end);
   el.addEventListener('touchend', end);
+  el.addEventListener('touchcancel', end);
 }
 
 /* File -> dataURL */
@@ -404,7 +460,42 @@ render();
   layoutGrid();
 })();
 
-// Add to hr-animations.js (after DOM is ready)
+function openFullscreenPreview(slot){
+  const showMsg = (slot.mode === 'message' || slot.mode === 'both');
+  const showImg = (slot.mode === 'image'   || slot.mode === 'both');
+  const isWhite = !!slot.img && slot.img === PLACEHOLDER_WHITE_IMG;
+
+  // background behind everything
+  fsStage.style.background = slot.bg || DEFAULT_BG;
+
+  // image (same visibility logic as editor)
+  if (showImg && slot.img && !isWhite) {
+    if (fsImg.dataset.src !== slot.img) { fsImg.dataset.src = slot.img; fsImg.src = slot.img; }
+    fsImg.style.display = 'block';
+  } else {
+    fsImg.style.display = 'none';
+  }
+
+  // text (same content + overlay logic as editor)
+  fsText.textContent = slot.message || DEFAULT_MESSAGE;
+  fsText.style.display = showMsg ? 'flex' : 'none';
+  fsText.classList.toggle('over-image', showImg && showMsg && !isWhite);
+
+  // show overlay
+  fs.classList.add('show');
+
+  // ESC to close
+  const onKey = (e)=>{ if(e.key === 'Escape') { closeFullscreenPreview(); } };
+  window.addEventListener('keydown', onKey, { once:true });
+
+  // click anywhere to close
+  fs.onclick = closeFullscreenPreview;
+}
+function closeFullscreenPreview(){
+  fs.classList.remove('show');
+  fs.onclick = null;
+}
+
 (function(){
   const OVERLAY_MIN_W = 1024;
   const OVERLAY_MIN_H = 600;
