@@ -7,37 +7,121 @@
   --primary:#4c8bf5;
   --danger:#d84b4b;
   --radius:16px;
+  --appbar-h: 56px; 
 }
+
 *{box-sizing:border-box}
 html,body{height:100%}
 body{
-  margin:0; font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+  margin:0; 
+  display: grid;
+  grid-template-rows: auto 1fr; 
+  font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
   background:var(--bg); color:var(--fg);
+  /* size: 1vh; */
 }
 .appbar{
+  /* 
   display:flex; align-items:center; justify-content:space-between;
   padding:12px 16px; background:var(--surface); border-bottom:1px solid #2a2c31;
-  position:sticky; top:0; z-index:10;
-}
+  position:sticky; top:0; z-index:10; 
+  */
+  
+  min-height: var(--appbar-h); 
+  }
+
+/* Ensure overlays are above images */
+.live-preview img  { z-index: 1; }
+.live-text         { z-index: 2; }
+.thumb .thumb-img  { z-index: 1; }
+.thumb .thumb-text { z-index: 2; }
+
 h1{font-size:1.1rem; margin:0}
 nav{display:flex; gap:8px}
-.container{padding:16px; max-width:1200px; margin:0 auto}
-.hint{color:var(--muted); margin:8px 0 16px}
-.grid{
-  display:grid; gap:12px;
-  grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+
+.hint { color:#eef1f4; }
+.note { color:#cbd1d6; }
+
+/* Full-width, full-height content area */
+.container{
+  max-width: none;                 
+  padding: clamp(8px, 2vw, 16px);  /* responsive padding */
+  overflow: auto;
+  min-height: 0;
 }
+
+  /* Responsive full-width grid of thumbnail images */
+.grid{
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(480px, 1fr)); /* grow/shrink */
+  gap: clamp(8px, 1.5vw, 16px);
+  align-content: start;            /* pack rows to the top */
+}
+
 .card{
   background:var(--card); border:1px solid #2a2c31; border-radius:var(--radius);
   display:flex; flex-direction:column; overflow:hidden;
 }
-.card-top{padding:10px 10px 0}
-.thumb{
-  position:relative; width:100%; aspect-ratio:16/9; border-radius:12px; overflow:hidden;
-  background:#333; display:flex; align-items:center; justify-content:center;
+/* This adjusts the thumbnail to 16:9 within the thumbnail page */
+.thumb {
+  position: relative;
+  aspect-ratio: 16 / 9;       /* keep 16:9 without hardcoding height */
+  width: 100%;                /* fill the grid cell */
+/*  min-width: 120px;           /* don’t shrink below this */
+/*  min-height: 68px;           /* matches 16:9 ratio */
+  border-radius: 12px;
+  background: #111;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  display:flex; align-items:center; justify-content:center;
 }
-.thumb img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:none}
-.thumb .thumb-text{z-index:1; font-weight:700; font-size:1rem; text-align:center; padding:6px 8px; border-radius:8px; background:transparent}
+
+/* This keeps the thumbnail proportions within the thumbnail page */
+.thumb .thumb-mini {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  width: 36px;      /* smaller than editor mini */
+  height: auto;
+  border: 1px solid #666;
+  background: #fff;
+} 
+
+.thumb { position: relative; width:100%; aspect-ratio:16/9; border-radius:12px; overflow:hidden; }
+.thumb .thumb-img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:none; }
+.thumb .thumb-text { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; }
+.thumb .thumb-text.over-image {
+  color:#fff !important; background:rgba(0,0,0,.3);
+  padding:.25em .5em; border-radius:10px; text-shadow:0 2px 4px rgba(0,0,0,.6);
+}
+
+/* editor mini preview overrides. */
+.mini-info .thumb-mini{
+  position: static;
+  display: inline-block;
+  width: 48px;
+  height: 32px;
+}
+
+/* This is the mini image inside the thumbnail images */
+.mini-info {
+  position: relative;       /* make container positioning context */
+}
+
+.thumb-mini {
+  position: absolute;
+  bottom: 4px;              /* adjust as you like for position */
+  right: 4px;               /* adjust as you like for position */
+  width: 48px;              /* small thumbnail size */
+  height: auto;
+  border: 1px solid #999;
+  background: #fff;
+}
+
+.card-top{padding:10px 10px 0}
 .card-bottom{padding:10px}
 .meta{font-size:.85rem; color:var(--muted); margin-bottom:8px}
 .row{display:flex; gap:8px}
@@ -47,8 +131,14 @@ nav{display:flex; gap:8px}
 }
 .btn.small{padding:6px 10px; font-size:.9rem}
 .btn.primary{background:var(--primary); border-color:transparent}
-.btn.danger{background:#3a1d1d; border-color:#4a2323; color:#f7d7d7}
+.btn.danger{background:#990000; border-color:#4a2323; color:#f7d7d7}
 .btn:active{transform:translateY(1px)}
+
+.badge{
+  font-size:.9rem; padding:4px 8px; border-radius:999px;
+  background:#3a1d1d; color:#f7d7d7; border:1px solid #4a2323;
+}
+
 /* Editor */
 dialog::backdrop{background:rgba(0,0,0,.6)}
 dialog{border:none; padding:0; background:transparent}
@@ -63,15 +153,86 @@ dialog{border:none; padding:0; background:transparent}
   grid-template-columns:1.1fr .9fr;
 }
 .preview-wrap{display:flex; flex-direction:column; gap:8px}
-.live-preview{
-  position:relative; width:100%; aspect-ratio:16/9; border-radius:16px; overflow:hidden; background:#222;
-  display:flex; align-items:center; justify-content:center; border:1px solid #2a2c31;
+
+/* Ensure all editor uses the light foreground color */
+.editor,
+.editor h2,
+.editor label,
+.editor legend,
+.editor .field > span,
+.editor .note {
+  color: var(--fg) !important;
 }
-.live-preview img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:none}
-.live-text{font-size:clamp(20px,6vw,48px); font-weight:800; text-align:center; padding:.25em .5em; border-radius:12px}
+
+/* Slightly lift the editor header for contrast */
+.editor-head { background: #1b1d21; }
+
+/* Improve placeholder visibility too (optional) */
+.field input::placeholder { color: #b6bbc2; }
+
+/* EDITOR PREVIEW: also 16:9 stage */
+.live-preview{
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 16px;
+  overflow: hidden;
+  background: #222;
+  border: 1px solid #2a2c31;
+}
+.live-preview img{
+  position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:none;
+}
+
+.live-text{
+  position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  font-size:clamp(20px,4vw,48px); font-weight:800; text-align:center; padding:.25em .5em;
+  border-radius:12px; text-shadow:0 2px 4px rgba(0,0,0,.5);
+}
+/* Readable overlay when text is on top of an image */
+.live-text.over-image{
+  color:#fff !important;
+  background:rgba(0,0,0,.35);  
+  padding:.35em .6em;
+  border-radius:12px;
+  text-shadow:0 2px 4px rgba(0,0,0,.6);
+}
+.live-text.anim-flash { animation: flashKey 1.2s linear infinite }
+.live-text.anim-zoom  { animation: zoomKey  1.6s ease-in-out infinite }
+.live-text.anim-spin  { animation: spinKey  2.2s linear infinite; display:inline-block }
+
 .note{color:var(--muted)}
 .fields{display:grid; gap:12px; align-content:start}
 .field{display:flex; flex-direction:column; gap:6px}
 .field input[type="text"]{padding:10px 12px; border-radius:10px; border:1px solid #2a2c31; background:#1c1e22; color:var(--fg)}
 .field input[type="color"]{height:40px; width:80px; padding:0; border-radius:8px; border:1px solid #2a2c31; background:#1c1e22}
 .actions-row{display:flex; gap:8px; margin-top:8px}
+
+/* Message animation styles */
+@keyframes flashKey {
+  0%,49% { opacity: 1 }
+  50%,99% { opacity: 0.15 }
+}
+@keyframes zoomKey {
+  0%   { transform: scale(0.9) }
+  50%  { transform: scale(1.05) }
+  100% { transform: scale(0.9) }
+}
+@keyframes spinKey {
+  0% { transform: rotate(0deg)   scale(1.0) }
+  50%{ transform: rotate(180deg) scale(1.05) }
+  100%{transform: rotate(360deg) scale(1.0) }
+}
+
+.fieldset { border:0; padding:0; margin:0 }
+fieldset label { display:inline-flex; gap:6px; align-items:center; margin-right:12px }
+
+/* Minimum display spec notice */
+.spec-overlay{
+  position:fixed; inset:0; background:rgba(0,0,0,.7);
+  display:flex; align-items:center; justify-content:center; z-index:9999;
+}
+.spec-card{
+  background:#1e2024; color:#fff; padding:20px 24px; border-radius:14px;
+  border:1px solid #2a2c31; max-width:520px; text-align:center;
+}

@@ -16,8 +16,7 @@
   </header>
 
   <main class="container">
-    <p class="hint">Tap an animation to edit. Long‑press “Reset” to restore default.</p>
-
+    <!-- <p class="hint">Tap an animation to edit.</p> -->
     <section id="grid" class="grid"></section>
   </main>
 
@@ -35,6 +34,13 @@
             <img id="liveImage" alt="" />
           </div>
           <small class="note">Preview (image overrides message/background)</small>
+
+          
+          <div class="mini-info">
+            <img id="liveMini" class="thumb-mini" alt="mini preview">
+            <span class="mini-label">Current image</span>
+          </div>
+
         </div>
 
         <div class="fields">
@@ -53,10 +59,31 @@
             <input id="fImage" type="file" accept="image/*" />
           </label>
 
+          <fieldset class="field">
+            <legend>Display</legend>
+            <label><input type="radio" name="mode" value="message" id="modeMessage"> Show Message</label>
+            <label><input type="radio" name="mode" value="image" id="modeImage"> Show Image</label>
+            <label><input type="radio" name="mode" value="both" id="modeBoth"> Show Both</label>
+          </fieldset>
+
+
+          <label class="field">
+            <span>Message Animation</span>
+            <select id="fTextAnim">
+              <option value="none">None</option>
+              <option value="flash">Flash</option>
+              <option value="zoom">Zoom</option>
+              <option value="spin">Spin</option>
+            </select>
+          </label>
+
           <div class="actions-row">
-            <button id="btnSave" class="btn primary" value="save">Save</button>
-            <button id="btnCancel" class="btn" value="cancel">Cancel</button>
-            <button id="btnReset" class="btn danger hold">Hold to Reset</button>
+            <button id="btnSave"   type="button" class="btn primary">Save</button>
+            <span id="dirtyBadge" class="badge" hidden>Unsaved</span>
+            <button id="btnCancel" type="button" class="btn">Cancel</button>
+            <button id="btnReset"  type="button" class="btn danger hold">Hold to Reset</button>         
+          </div>
+
           </div>
         </div>
       </div>
@@ -67,22 +94,35 @@
     <div class="card">
       <div class="card-top">
         <div class="thumb" data-slot="">
-          <span class="thumb-text"></span>
-          <img class="thumb-img" alt="" />
-        </div>
+        <span class="thumb-text"></span>
+        <img class="thumb-img" alt="" />
+        <img class="thumb-mini" alt="" />
+      </div>  
+
       </div>
       <div class="card-bottom">
         <div class="meta">
-          <span class="slot">#0</span>
         </div>
         <div class="row">
+          <span class="slot">#0</span>
           <button class="btn small edit">Edit</button>
-          <button class="btn small danger hold reset">Hold to Reset</button>
+          <button class="btn small danger hold reset">Hold to Reset to Defaults</button>
         </div>
       </div>
     </div>
   </template>
 
   <script src="hr-animations.js"></script>
+
+<!-- Minimum display spec requiement -->
+<div id="specOverlay" style="display:none" class="spec-overlay">
+  <div class="spec-card">
+    <h3>Sorry — minimum size required</h3>
+    <p>This screen needs at least <strong>1024×600</strong> in <strong>landscape</strong> to work well.</p>
+    <p>Rotate your device or use a larger display.</p>
+  </div>
+</div>
+
+
 </body>
 </html>

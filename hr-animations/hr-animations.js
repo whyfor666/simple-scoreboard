@@ -1,60 +1,87 @@
 /* Storage contract:
 localStorage['ss.animations.v1'] = JSON.stringify(Array(10).fill({
-  message:"Go Team", bg:"#0047ab", img:null
+  message:"Go Team", bg:"#0047ab", img:null, mode:"message", textAnim:"flash"
 }))
-Structure per slot: { message: string, bg: "#rrggbb", img: dataURL|null }
 */
+
 const STORAGE_KEY = 'ss.animations.v1';
 const DEFAULT_BG = '#0047ab';
 const DEFAULT_MESSAGE = 'Go Team';
 
-function getDefaults(){
-  return Array.from({length:10}, () => ({
-    message: DEFAULT_MESSAGE,
-    bg: DEFAULT_BG,
-    img: null
-  }));
+/* ---------- Utilities ---------- */
+function makeWhitePNG(){
+  const c = document.createElement('canvas'); c.width = c.height = 1;
+  const ctx = c.getContext('2d'); ctx.fillStyle = '#ffffff'; ctx.fillRect(0,0,1,1);
+  return c.toDataURL('image/png');
+}
+function contrastText(hex){
+  const c = (hex||'#000').replace('#','');
+  const r = parseInt(c.slice(0,2),16)/255;
+  const g = parseInt(c.slice(2,4),16)/255;
+  const b = parseInt(c.slice(4,6),16)/255;
+  const toLin = v=> v<=0.03928 ? v/12.92 : Math.pow((v+0.055)/1.055,2.4);
+  const L = 0.2126*toLin(r) + 0.7152*toLin(g) + 0.0722*toLin(b);
+  return L > 0.5 ? '#000000' : '#ffffff';
+}
+function setImageIfChanged(imgEl, dataUrl){
+  if(imgEl.dataset.src !== (dataUrl||'')){
+    imgEl.dataset.src = dataUrl||'';
+    if(dataUrl) imgEl.src = dataUrl;
+  }
+}
+function applyTextAnimClass(textEl, kind){
+  textEl.classList.remove('anim-flash','anim-zoom','anim-spin');
+  if(kind==='flash') textEl.classList.add('anim-flash');
+  else if(kind==='zoom') textEl.classList.add('anim-zoom');
+  else if(kind==='spin') textEl.classList.add('anim-spin');
 }
 
+/* ---------- State ---------- */
+let PLACEHOLDER_WHITE_IMG = makeWhitePNG();
+
+function withDefaults(x){
+  const saneImg = (typeof x?.img === 'string' && x.img.startsWith('data:image')) ? x.img : PLACEHOLDER_WHITE_IMG;
+  const mode = (x?.mode==='message'||x?.mode==='image'||x?.mode==='both') ? x.mode : (saneImg!==PLACEHOLDER_WHITE_IMG ? 'image' : 'message');
+  const textAnim = (['none','flash','zoom','spin'].includes(x?.textAnim)) ? x.textAnim : 'flash';
+  return {
+    message: typeof x?.message === 'string' ? x.message : DEFAULT_MESSAGE,
+    bg: /^#([0-9a-f]{6})$/i.test(x?.bg||'') ? x.bg : DEFAULT_BG,
+    img: saneImg,
+    mode,
+    textAnim
+  };
+}
+function getDefaults(){
+  return Array.from({length:10}, () => ({
+    message: DEFAULT_MESSAGE, bg: DEFAULT_BG, img: PLACEHOLDER_WHITE_IMG, mode: 'message', textAnim: 'flash'
+  }));
+}
 function loadAnimations(){
   try{
     const raw = localStorage.getItem(STORAGE_KEY);
     if(!raw) return getDefaults();
-    const parsed = JSON.parse(raw);
-    if(!Array.isArray(parsed) || parsed.length !== 10) return getDefaults();
-    // sanitize
-    return parsed.map(x => ({
-      message: typeof x?.message === 'string' ? x.message : DEFAULT_MESSAGE,
-      bg: /^#([0-9a-f]{6})$/i.test(x?.bg||'') ? x.bg : DEFAULT_BG,
-      img: typeof x?.img === 'string' && x.img.startsWith('data:image') ? x.img : null
-    }));
+    const arr = JSON.parse(raw);
+    if(!Array.isArray(arr) || arr.length!==10) return getDefaults();
+    return arr.map(withDefaults);
   }catch{ return getDefaults(); }
 }
-
 function saveAnimations(arr){
   localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
 }
 
-function contrastText(hex){ // returns '#000' or '#fff'
-  const c = hex.replace('#','');
-  const r = parseInt(c.slice(0,2),16)/255;
-  const g = parseInt(c.slice(2,4),16)/255;
-  const b = parseInt(c.slice(4,6),16)/255;
-  // Relative luminance
-  const srgb = [r,g,b].map(v=> v<=0.03928 ? v/12.92 : Math.pow((v+0.055)/1.055,2.4));
-  const L = 0.2126*srgb[0] + 0.7152*srgb[1] + 0.0722*srgb[2];
-  return L > 0.5 ? '#000000' : '#ffffff';
-}
-
-/* Elements */
+/* ---------- DOM ---------- */
 const gridEl = document.getElementById('grid');
 const tpl = document.getElementById('cardTpl');
 
 const editor = document.getElementById('editor');
 const editorSlot = document.getElementById('editorSlot');
+const dirtyBadge = document.getElementById('dirtyBadge');
+
 const livePreview = document.getElementById('livePreview');
 const liveText = document.getElementById('liveText');
 const liveImage = document.getElementById('liveImage');
+const liveMini = document.getElementById('liveMini');
+
 const fMessage = document.getElementById('fMessage');
 const fBg = document.getElementById('fBg');
 const fImage = document.getElementById('fImage');
@@ -62,165 +89,156 @@ const btnSave = document.getElementById('btnSave');
 const btnCancel = document.getElementById('btnCancel');
 const btnReset = document.getElementById('btnReset');
 
+const modeMessage = document.getElementById('modeMessage');
+const modeImage   = document.getElementById('modeImage');
+const modeBoth    = document.getElementById('modeBoth');
+const fTextAnim   = document.getElementById('fTextAnim');
+
+/* ---------- App ---------- */
 let state = loadAnimations();
 let editingIndex = null;
+let originalSlot = null;
 
-/* Render grid */
+/* Render thumbnails grid */
 function render(){
   gridEl.innerHTML = '';
   state.forEach((slot, idx)=>{
     const node = tpl.content.firstElementChild.cloneNode(true);
     const thumb = node.querySelector('.thumb');
     const tText = node.querySelector('.thumb-text');
-    const tImg = node.querySelector('.thumb-img');
+    const tImg  = node.querySelector('.thumb-img');
+    const tMini = node.querySelector('.thumb-mini');
     const slotLbl = node.querySelector('.slot');
     const btnEdit = node.querySelector('.edit');
-    const btnReset = node.querySelector('.reset');
+    const btnResetCard = node.querySelector('.reset');
 
     slotLbl.textContent = `#${idx}`;
     thumb.dataset.slot = String(idx);
 
-    if(slot.img){
-      tImg.src = slot.img;
-      tImg.style.display = 'block';
-      tText.style.display = 'none';
-      thumb.style.background = '#111';
-    }else{
-      tImg.style.display = 'none';
-      tText.style.display = 'inline';
-      tText.textContent = slot.message || DEFAULT_MESSAGE;
+    const showMsg = (slot.mode==='message' || slot.mode==='both');
+    const showImg = (slot.mode==='image'   || slot.mode==='both');
+
+    // image + mini
+    if(slot.img){ tImg.src = slot.img; tMini.src = slot.img; tMini.style.display = 'block'; }
+    else { tMini.style.display = 'none'; }
+
+    // background color logic: show BG when no real image (placeholder counts as "no image")
+    const isWhitePlaceholder = !!slot.img && slot.img === PLACEHOLDER_WHITE_IMG;
+
+    if (!slot.img || isWhitePlaceholder) {
+      // No real image -> show the saved BG color (blue/yellow/etc.)
       thumb.style.background = slot.bg || DEFAULT_BG;
-      tText.style.color = contrastText(slot.bg || DEFAULT_BG);
+      tImg.style.display = 'none';
+    } else {
+      // Real image present
+      thumb.style.background = '#111';
+      tImg.style.display = showImg ? 'block' : 'none';
     }
+    // Overlay text (Both) readability on top of image text
+    tText.textContent = slot.message || DEFAULT_MESSAGE;
+    tText.style.color = contrastText(slot.bg || DEFAULT_BG);
+    tText.style.display = showMsg ? 'flex' : 'none';
+    tText.classList.toggle('over-image', showImg && showMsg && !!slot.img && !isWhitePlaceholder);
 
     btnEdit.addEventListener('click', ()=> openEditor(idx));
-    applyHoldToReset(btnReset, ()=> resetSlot(idx));
+    applyHoldToReset(btnResetCard, ()=> resetSlot(idx));
 
     gridEl.appendChild(node);
   });
 }
 
-/* Editor open/close */
+let pendingImage = null; // holds unsaved image while editing
+
+/* Editor open */
 function openEditor(idx){
   editingIndex = idx;
   const slot = state[idx];
+  pendingImage = slot.img;       
+  originalSlot = JSON.parse(JSON.stringify(state[editingIndex])); // new baseline
+  pendingImage = state[editingIndex].img;                         // keep session in sync
 
   editorSlot.textContent = `#${idx}`;
   fMessage.value = slot.message;
   fBg.value = slot.bg;
-  fImage.value = ''; // clear
-
-  refreshLivePreview(slot);
-  editor.showModal();
-}
-
-function refreshLivePreview(slot){
-  if(slot.img){
-    liveImage.src = slot.img;
-    liveImage.style.display = 'block';
-    livePreview.style.background = '#000';
-    liveText.style.display = 'none';
-  }else{
-    liveImage.style.display = 'none';
-    livePreview.style.background = slot.bg;
-    liveText.style.display = 'inline';
-    liveText.textContent = slot.message || DEFAULT_MESSAGE;
-    liveText.style.color = contrastText(slot.bg);
-  }
-}
-
-/* File -> dataURL */
-function fileToDataURL(file){
-  return new Promise((resolve,reject)=>{
-    const r = new FileReader();
-    r.onload = ()=> resolve(r.result);
-    r.onerror = reject;
-    r.readAsDataURL(file);
-  });
-}
-
-/* Editor events */
-fMessage.addEventListener('input', ()=>{
-  if(editingIndex==null) return;
-  const draft = { ...state[editingIndex], message: fMessage.value };
-  refreshLivePreview(draft);
-});
-fBg.addEventListener('input', ()=>{
-  if(editingIndex==null) return;
-  const draft = { ...state[editingIndex], bg: fBg.value };
-  refreshLivePreview(draft);
-});
-fImage.addEventListener('change', async ()=>{
-  if(editingIndex==null) return;
-  const file = fImage.files?.[0];
-  if(!file){ // cleared
-    const draft = { ...state[editingIndex], img: null };
-    refreshLivePreview(draft);
-    return;
-  }
-  const dataURL = await fileToDataURL(file);
-  const draft = { ...state[editingIndex], img: dataURL };
-  refreshLivePreview(draft);
-});
-
-btnSave.addEventListener('click', (e)=>{
-  e.preventDefault();
-  if(editingIndex==null) return editor.close();
-
-  const current = state[editingIndex];
-  const file = fImage.files?.[0];
-
-  const finalize = (imgData)=>{
-    const updated = {
-      message: fMessage.value.trim() || DEFAULT_MESSAGE,
-      bg: fBg.value || DEFAULT_BG,
-      img: imgData ?? current.img
-    };
-    state[editingIndex] = updated;
-    saveAnimations(state);
-    render();
-    editor.close();
-  };
-
-  if(file){
-    fileToDataURL(file).then(data=>finalize(data));
-  }else{
-    finalize(undefined);
-  }
-});
-
-btnCancel.addEventListener('click', (e)=>{ e.preventDefault(); editor.close(); });
-applyHoldToReset(btnReset, ()=>{
-  if(editingIndex==null) return;
-  resetSlot(editingIndex);
-  // refresh editor view to defaults
-  const slot = state[editingIndex];
-  fMessage.value = slot.message;
-  fBg.value = slot.bg;
   fImage.value = '';
+
+  modeMessage.checked = (slot.mode==='message');
+  modeImage.checked   = (slot.mode==='image');
+  modeBoth.checked    = (slot.mode==='both');
+
+  fTextAnim.value = slot.textAnim;
+
+  setDirty(false);
   refreshLivePreview(slot);
-});
+  clearDirty();
+  editor.showModal();
+
+}
+
+let isDirty = false;
+
+function markDirty() {
+  if (!isDirty) {
+    isDirty = true;
+    document.getElementById('dirtyBadge').hidden = false;
+  }
+}
+function clearDirty() {
+  isDirty = false;
+  document.getElementById('dirtyBadge').hidden = true;
+}
+
+function setDirty(isDirty){ dirtyBadge.hidden = !isDirty; }
+
+function currentDraftFromFields(){
+  const mode = modeMessage.checked ? 'message' : modeImage.checked ? 'image' : 'both';
+  return {
+    message: fMessage.value.trim() || DEFAULT_MESSAGE,
+    bg: fBg.value || DEFAULT_BG,
+    img: pendingImage ?? state[editingIndex]?.img ?? PLACEHOLDER_WHITE_IMG, // <-- key line
+    mode,
+    textAnim: fTextAnim.value
+  };
+}
+
+function isDifferent(a, b){
+  const sameImg = (a.img || '') === (b.img || '');
+  return (
+    a.message !== b.message ||
+    a.bg      !== b.bg      ||
+    a.mode    !== b.mode    ||
+    a.textAnim!== b.textAnim ||
+    !sameImg                                // <- new: track image changes
+  );
+}
+
+/* Live preview */
+function refreshLivePreview(slot){
+  const showMsg = (slot.mode === 'message' || slot.mode === 'both');
+  const showImg = (slot.mode === 'image'   || slot.mode === 'both');
+  const isWhitePlaceholder = !!slot.img && slot.img === PLACEHOLDER_WHITE_IMG;
+
+  // 1) Set the big preview image and the mini preview
+  setImageIfChanged(liveImage, slot.img);
+  if (liveMini) liveMini.src = slot.img || PLACEHOLDER_WHITE_IMG;
+
+  // 2) Visibility
+  liveImage.style.display = (showImg && !isWhitePlaceholder) ? 'block' : 'none';
+  liveText.style.display  = showMsg ? 'flex' : 'none';
+  liveText.classList.toggle('over-image', showImg && showMsg && !isWhitePlaceholder);
+
+  // 3) Background + text styling
+  livePreview.style.background = slot.bg;
+  liveText.textContent = slot.message || DEFAULT_MESSAGE;
+  liveText.style.color = contrastText(slot.bg);
+  applyTextAnimClass(liveText, slot.textAnim);
+}
 
 /* Long-press helper */
 function applyHoldToReset(el, onConfirm){
-  let t = null;
-  let progress = 0;
-  const HOLD_MS = 900;
-
-  const start = ()=>{
-    if(t) return;
-    progress = 0;
-    t = setInterval(()=>{
-      progress += 100;
-      if(progress >= HOLD_MS){
-        clearInterval(t); t=null;
-        onConfirm();
-      }
-    },100);
-  };
-  const end = ()=>{
-    if(t){ clearInterval(t); t=null; }
-  };
+  let t=null; const HOLD_MS=900;
+  const start=()=>{ if(t) return; t=setTimeout(()=>{ t=null; onConfirm(); }, HOLD_MS); };
+  const end=()=>{ if(t){ clearTimeout(t); t=null; } };
   el.addEventListener('mousedown', start);
   el.addEventListener('touchstart', start);
   el.addEventListener('mouseup', end);
@@ -228,12 +246,178 @@ function applyHoldToReset(el, onConfirm){
   el.addEventListener('touchend', end);
 }
 
-/* Reset a slot to defaults */
-function resetSlot(idx){
-  state[idx] = { message: DEFAULT_MESSAGE, bg: DEFAULT_BG, img: null };
-  saveAnimations(state);
-  render();
+/* File -> dataURL */
+function fileToDataURL(file){
+  return new Promise((resolve,reject)=>{
+    const r=new FileReader(); r.onload=()=>resolve(r.result); r.onerror=reject; r.readAsDataURL(file);
+  });
 }
 
-/* Init */
+/* Listeners (now that all elements are defined) */
+[fMessage, fBg, fTextAnim, modeMessage, modeImage, modeBoth].forEach(el=>{
+  const onAny = ()=>{
+    if (editingIndex == null) return;
+    // keep your existing draft/preview logic if you have it:
+    const draft = currentDraftFromFields();        // this still includes pendingImage
+    refreshLivePreview({ ...state[editingIndex], ...draft });
+    markDirty();                                   // <-- just mark dirty
+  };
+  el.addEventListener('input', onAny);
+  el.addEventListener('change', onAny);
+});
+
+fImage.addEventListener('change', async ()=>{
+  if (editingIndex == null) return;
+  const file = fImage.files?.[0];
+
+  if (!file) {
+    pendingImage = PLACEHOLDER_WHITE_IMG;                 // <-- track cleared file
+    const draft = { ...state[editingIndex], ...currentDraftFromFields(), img: pendingImage };
+    setDirty(true);
+    refreshLivePreview(draft);
+    return;
+  }
+
+  const dataURL = await fileToDataURL(file);
+  pendingImage = dataURL;                                 // <-- track new file
+  // Auto-switch to "Show Image" for convenience
+  modeImage.checked = true; modeMessage.checked = false; modeBoth.checked = false;
+
+  const draft = { ...state[editingIndex], ...currentDraftFromFields(), img: pendingImage, mode: 'image' };
+  setDirty(true);
+  refreshLivePreview(draft);
+});
+
+
+/* Save / Cancel / Reset (editor) */
+btnSave.addEventListener('click', (e)=>{
+  e.preventDefault();
+  if(editingIndex==null) return editor.close();
+
+  const current = state[editingIndex];
+  const file = fImage.files?.[0];
+  const mode = modeMessage.checked ? 'message' : modeImage.checked ? 'image' : 'both';
+
+  const finalize = (imgData)=>{
+    state[editingIndex] = {
+      message: fMessage.value.trim() || DEFAULT_MESSAGE,
+      bg: fBg.value || DEFAULT_BG,
+      img: pendingImage || imgData || current.img || PLACEHOLDER_WHITE_IMG, // <-- use pending image
+      mode,
+      textAnim: fTextAnim.value
+    };
+    saveAnimations(state);
+    render();
+    clearDirty();
+    setDirty(false);
+    editor.close();
+  };
+
+  if(file){ fileToDataURL(file).then(data=>finalize(data)); }
+  else { finalize(undefined); }
+});
+
+btnCancel.addEventListener('click', (e)=>{ e.preventDefault(); editor.close(); });
+applyHoldToReset(btnReset, ()=>{
+  if(editingIndex==null) return;
+  resetSlot(editingIndex);
+  const slot = state[editingIndex];  
+  pendingImage = slot.img;                      // <-- reset session image
+  fMessage.value = slot.message;
+  fBg.value = slot.bg;
+  fImage.value = '';
+  modeMessage.checked=true; modeImage.checked=false; modeBoth.checked=false;
+  fTextAnim.value = slot.textAnim;
+  markDirty();
+  setDirty(false);
+  refreshLivePreview(slot);
+});
+
+/* Reset a slot to defaults (used by card + editor) */
+function resetSlot(idx){
+  state[idx] = {
+    message: DEFAULT_MESSAGE,
+    bg: DEFAULT_BG,
+    img: PLACEHOLDER_WHITE_IMG,
+    mode: 'message',
+    textAnim: 'flash'
+  };
+  saveAnimations(state);
+  render();
+  clearDirty();
+
+}
+
+/* Boot */
 render();
+
+
+// Fit the 10 cards to the viewport (tablet-first). Allows one vertical scroll on narrow screens.
+(function(){
+  const grid = document.getElementById('grid');
+  const container = document.querySelector('.container');
+  const COUNT = 10;
+
+  function px(v){ return parseFloat(v) || 0; }
+
+  function layoutGrid(){
+    if (!grid || !container) return;
+
+    const ccs = getComputedStyle(container);
+    const gcs = getComputedStyle(grid);
+    const padX = px(ccs.paddingLeft) + px(ccs.paddingRight);
+    const padY = px(ccs.paddingTop)  + px(ccs.paddingBottom);
+    const gap  = px(gcs.gap);
+
+    const availW = container.clientWidth  - padX;
+    const availH = container.clientHeight - padY;
+
+    // If screen is narrow (e.g., phone landscape), allow one vertical scroll:
+    const allowVerticalScroll = window.innerWidth < 800;
+
+    let best = { cols: 1, width: 0, rows: COUNT };
+
+    for (let cols = 1; cols <= COUNT; cols++) {
+      const rows = Math.ceil(COUNT / cols);
+
+      // width constraint
+      const widthFit = (availW - gap * (cols - 1)) / cols;
+
+      // height constraint (convert max cell height to width via 16:9)
+      const maxCellH = (availH - gap * (rows - 1)) / rows;
+      const heightFitWidth = allowVerticalScroll ? widthFit : maxCellH * (16/9);
+
+      const cellW = Math.min(widthFit, heightFitWidth);
+      if (cellW > best.width) best = { cols, width: Math.max(120, cellW), rows };
+    }
+
+    grid.style.gridTemplateColumns = `repeat(${best.cols}, ${best.width}px)`;
+    // If we’re allowing vertical scroll, let container scroll; otherwise hide it.
+    container.style.overflow = allowVerticalScroll ? 'auto' : 'hidden';
+  }
+
+  window.addEventListener('resize', layoutGrid);
+
+  // Call after your existing render()
+  const _render = render;
+  render = function(){ _render(); layoutGrid(); };
+  layoutGrid();
+})();
+
+// Add to hr-animations.js (after DOM is ready)
+(function(){
+  const OVERLAY_MIN_W = 1024;
+  const OVERLAY_MIN_H = 600;
+  const overlay = document.getElementById('specOverlay');
+
+  function checkSpec(){
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    const isLandscape = w >= h;
+    const ok = isLandscape && (w >= OVERLAY_MIN_W) && (h >= OVERLAY_MIN_H);
+    overlay.style.display = ok ? 'none' : 'flex';
+  }
+
+  window.addEventListener('resize', checkSpec);
+  checkSpec();
+})();
