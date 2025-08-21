@@ -29,6 +29,24 @@ function setImageIfChanged(imgEl, dataUrl){
     if(dataUrl) imgEl.src = dataUrl;
   }
 }
+// --- GIF hover-only support helpers ---
+const STILL_CACHE = new Map();
+async function firstFrameFromImage(dataUrl){
+  if (STILL_CACHE.has(dataUrl)) return STILL_CACHE.get(dataUrl);
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.src = dataUrl;
+  await img.decode();
+  const c = document.createElement('canvas');
+  c.width = img.naturalWidth || 1; c.height = img.naturalHeight || 1;
+  const ctx = c.getContext('2d');
+  ctx.drawImage(img, 0, 0);
+  const still = c.toDataURL('image/png');
+  STILL_CACHE.set(dataUrl, still);
+  return still;
+}
+function isGifDataUrl(s){ return typeof s === 'string' && s.startsWith('data:image/gif'); }
+
 function applyTextAnimClass(textEl, kind){
   textEl.classList.remove('anim-flash','anim-zoom','anim-spin');
   if(kind==='flash') textEl.classList.add('anim-flash');
@@ -105,73 +123,115 @@ let state = loadAnimations();
 let editingIndex = null;
 let originalSlot = null;
 
+
 /* Render thumbnails grid */
 function render(){
   gridEl.innerHTML = '';
   state.forEach((slot, idx)=>{
-    const node = tpl.content.firstElementChild.cloneNode(true);
+    const node  = tpl.content.firstElementChild.cloneNode(true);
     const thumb = node.querySelector('.thumb');
     const tText = node.querySelector('.thumb-text');
     const tImg  = node.querySelector('.thumb-img');
     const tMini = node.querySelector('.thumb-mini');
 
+    // Mini thumbnail: ALWAYS static (first frame). Never animates.
+    tMini.style.display = 'none'; // default hidden
+    const imgSrcTop = slot.img;
+    if (imgSrcTop && !isGifDataUrl(imgSrcTop)) {
+      setImageIfChanged(tMini, imgSrcTop);
+      tMini.style.display = 'block';
+    }
+
+    // TEXT animates only on hover
+    const hoverTextOn  = () => {
+      const s = state[idx];
+      if (s.mode === 'message' || s.mode === 'both') applyTextAnimClass(tText, s.textAnim);
+    };
+    const hoverTextOff = () => applyTextAnimClass(tText, 'none');
+    thumb.addEventListener('mouseenter', hoverTextOn);
+    thumb.addEventListener('mouseleave', hoverTextOff);
+    applyTextAnimClass(tText, 'none'); // idle by default
+
+    // GIFs: show still by default; animate only on hover
+    (async () => {
+      const imgSrc = state[idx].img;
+      if (!imgSrc) return;
+      if (isGifDataUrl(imgSrc)) {
+        thumb.dataset.animatedSrc = imgSrc;
+        const still = await firstFrameFromImage(imgSrc);
+        setImageIfChanged(tImg, still);
+
+        // Mini should be static still too
+        setImageIfChanged(tMini, still);
+        tMini.style.display = 'block';
+
+        const imgHoverOn  = () => setImageIfChanged(tImg, thumb.dataset.animatedSrc);
+        const imgHoverOff = () => setImageIfChanged(tImg, still);
+        thumb.addEventListener('mouseenter', imgHoverOn);
+        thumb.addEventListener('mouseleave', imgHoverOff);
+        // two-finger touch ≈ hover
+        let twoFingerActive = false;
+        thumb.addEventListener('touchstart', (e)=>{
+          if (e.touches && e.touches.length >= 2) { twoFingerActive = true; imgHoverOn(); hoverTextOn(); }
+        }, {passive:true});
+        thumb.addEventListener('touchend', ()=>{
+          if (twoFingerActive) { twoFingerActive = false; imgHoverOff(); hoverTextOff(); }
+        }, {passive:true});
+        thumb.addEventListener('touchcancel', ()=>{
+          if (twoFingerActive) { twoFingerActive = false; imgHoverOff(); hoverTextOff(); }
+        }, {passive:true});
+      } else {
+        setImageIfChanged(tImg, imgSrc);
+      }
+    })();
+
     // data attributes for CSS badge and bookkeeping
     thumb.dataset.slot = String(idx);
-    thumb.dataset.slotnum = `#${idx+1}`;
+    thumb.dataset.slotnum = `#${idx}`;
 
-    // tap thumbnail to edit
-    thumb.addEventListener('click', () => openEditor(idx));
-
-    // Long‑press to preview (reusing your hold helper)
+    // Long-press to preview (no ghost-click)
     function applyHoldToPreview(el, onConfirm){
-  let t = null, fired = false;
-  const HOLD_MS = 550; // feel closer to “native” long‑press
+      let t = null, fired = false;
+      const HOLD_MS = 550;
+      function suppressOnce(e){
+        document.removeEventListener('click', suppressOnce, true);
+        if (fired) { e.preventDefault(); e.stopPropagation(); }
+        fired = false;
+      }
+      const start = () => {
+        if (t) return;
+        fired = false;
+        t = setTimeout(() => {
+          t = null;
+          fired = true;
+          document.addEventListener('click', suppressOnce, true);
+          onConfirm();
+        }, HOLD_MS);
+      };
+      const end = () => { if (t) { clearTimeout(t); t = null; } };
+      el.addEventListener('pointerdown', start);
+      el.addEventListener('pointerup', end);
+      el.addEventListener('pointercancel', end);
+      el.addEventListener('pointerleave', end);
+    }
 
-  // suppress the next click anywhere (captures at document level)
-  function suppressOnce(e){
-    document.removeEventListener('click', suppressOnce, true);
-    if (fired) { e.preventDefault(); e.stopPropagation(); }
-    fired = false; // reset
-  }
-
-  const start = () => {
-    if (t) return;
-    fired = false;
-    t = setTimeout(() => {
-      t = null;
-      fired = true;
-      document.addEventListener('click', suppressOnce, true); // eat the ghost click
-      onConfirm();
-    }, HOLD_MS);
-  };
-
-  const end = () => { if (t) { clearTimeout(t); t = null; } };
-
-  el.addEventListener('pointerdown', start);
-  el.addEventListener('pointerup', end);
-  el.addEventListener('pointercancel', end);
-  el.addEventListener('pointerleave', end);
-}
-
-  // Right‑click to preview (desktop)
-  thumb.addEventListener('click', ()=> openEditor(idx));            // tap = edit
-  applyHoldToPreview(thumb, ()=> openFullscreenPreview(state[idx])); // hold = preview
-  thumb.addEventListener('contextmenu', e=>{ e.preventDefault(); openFullscreenPreview(state[idx]); });
-
-    const showMsg = (slot.mode==='message' || slot.mode==='both');
-    const showImg = (slot.mode==='image'   || slot.mode==='both');
+    // tap = edit, hold/right-click = fullscreen preview
+    thumb.addEventListener('click', ()=> openEditor(idx));
+    applyHoldToPreview(thumb, ()=> openFullscreenPreview(state[idx]));
+    thumb.addEventListener('contextmenu', e=>{ e.preventDefault(); openFullscreenPreview(state[idx]); });
 
     // image + mini
     if (slot.img) {
-      tImg.src = slot.img;
       tMini.src = slot.img;
       tMini.style.display = 'block';
     } else {
       tMini.style.display = 'none';
     }
-
+    // image (main) visibility; mini handled above
     // treat white placeholder as "no real image" for BG color
     const isWhitePlaceholder = !!slot.img && slot.img === PLACEHOLDER_WHITE_IMG;
+    const showMsg = (slot.mode==='message' || slot.mode==='both');
+    const showImg = (slot.mode==='image'   || slot.mode==='both');
 
     if (!slot.img || isWhitePlaceholder) {
       thumb.style.background = slot.bg || DEFAULT_BG;
@@ -190,6 +250,7 @@ function render(){
     gridEl.appendChild(node);
   });
 }
+
 
 let pendingImage = null; // holds unsaved image while editing
 
@@ -460,6 +521,7 @@ render();
   layoutGrid();
 })();
 
+// --- Function ---
 function openFullscreenPreview(slot){
   const showMsg = (slot.mode === 'message' || slot.mode === 'both');
   const showImg = (slot.mode === 'image'   || slot.mode === 'both');
@@ -480,6 +542,8 @@ function openFullscreenPreview(slot){
   fsText.textContent = slot.message || DEFAULT_MESSAGE;
   fsText.style.display = showMsg ? 'flex' : 'none';
   fsText.classList.toggle('over-image', showImg && showMsg && !isWhite);
+
+  applyTextAnimClass(fsText, slot.textAnim);
 
   // show overlay
   fs.classList.add('show');
