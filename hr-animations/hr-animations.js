@@ -20,6 +20,28 @@ function formatKB(bytes) {
   return Number.isFinite(bytes) ? `${Math.round(bytes/1024).toLocaleString()} KB` : '0 KB';
 }
 
+function computeStorageTotals() {
+  let anim = 0, total = 0;
+  for (const s of state) {
+    const img = s && s.img;
+    if (!img || img === PLACEHOLDER_WHITE_IMG || typeof img !== 'string' || !img.startsWith('data:')) continue;
+    const bytes = bytesFromDataURL(img);
+    total += bytes;
+    if (/^data:(image\/gif|image\/apng|video\/)/i.test(img)) anim += bytes;
+  }
+  return { anim, total };
+}
+
+function updateStorageTotalsUI() {
+  const { anim, total } = computeStorageTotals();
+  const a = document.getElementById('animTotal');
+  const o = document.getElementById('overallTotal');
+  if (a) a.textContent = formatKB(anim);
+  if (o) o.textContent = formatKB(total);
+}
+
+
+
 // function makeWhitePNG(){  // 1x1 white pixel
 //   const c = document.createElement('canvas'); 
 //   c.width = c.height = 1;
@@ -282,8 +304,8 @@ tText.classList.toggle('over-image', showImg && showMsg);
     thumb.appendChild(sizeBadge);
     gridEl.appendChild(node);
   });
+  updateStorageTotalsUI();
 }
-
 
 let pendingImage = null; // holds unsaved image while editing
 
@@ -620,15 +642,41 @@ function closeFullscreenPreview(){
   checkSpec();
 })();
 
-// Format bytes -> "123 KB"   This is for Thumbnails page.
-function formatKB(bytes) {
-  return Number.isFinite(bytes) ? `${Math.round(bytes / 1024).toLocaleString()} KB` : '0 KB';
-}
+// // Format bytes -> "123 KB"   This is for Thumbnails page.
+// function formatKB(bytes) {
+//   return Number.isFinite(bytes) ? `${Math.round(bytes / 1024).toLocaleString()} KB` : '0 KB';
+// }
 
-function bytesFromDataURL(dataURL) {
-  try {
-    const i = dataURL.indexOf(',');
-    if (i < 0) return NaN;
-    return atob(dataURL.slice(i + 1)).length; // decoded bytes
-  } catch { return NaN; }
-}
+// function bytesFromDataURL(dataURL) {
+//   try {
+//     const i = dataURL.indexOf(',');
+//     if (i < 0) return NaN;
+//     return atob(dataURL.slice(i + 1)).length; // decoded bytes
+//   } catch { return NaN; }
+// }
+
+// function bytesFromDataURL(dataURL) {
+//   try { const i = dataURL.indexOf(','); if (i < 0) return NaN; return atob(dataURL.slice(i+1)).length; }
+//   catch { return NaN; }
+// }
+// function formatKB(bytes) {
+//   return Number.isFinite(bytes) ? `${Math.round(bytes/1024).toLocaleString()} KB` : '0 KB';
+// }
+// function computeStorageTotals(slotsArr) {
+//   let anim = 0, total = 0;
+//   for (const s of (slotsArr || [])) {
+//     const img = s && s.img;
+//     if (!img || img === PLACEHOLDER_WHITE_IMG || typeof img !== 'string' || !img.startsWith('data:')) continue;
+//     const bytes = bytesFromDataURL(img);
+//     total += bytes;
+//     if (/^data:(image\/gif|image\/apng|video\/)/i.test(img)) anim += bytes;
+//   }
+//   return { anim, total };
+// }
+// function updateStorageTotalsUI() {
+//   const { anim, total } = computeStorageTotals(slots);
+//   const a = document.getElementById('animTotal');
+//   const o = document.getElementById('overallTotal');
+//   if (a) a.textContent = formatKB(anim);
+//   if (o) o.textContent = formatKB(total);
+// }

@@ -468,3 +468,7 @@ fieldset label { display:inline-flex; gap:6px; align-items:center; margin-right:
 /* Make sure the KB badge sits above the image */
 .thumb-size-badge { z-index: 3; }
 
+.totals { margin-top: 6px; font-size: 0.95rem; }
+.totals .row { display: flex; justify-content: space-between; gap: 8px; }
+.totals .key { color: var(--muted, #9aa0a6); }
+.totals .val { font-weight: 600; }

@@ -9,7 +9,7 @@
 <body>
   <header class="appbar">
   <h1>HR Animations</h1>      
-  <p class="app-instructions">Tap to edit · Long-press for fullscreen preview</p>
+  <p class="app-instructions">Tap to edit · Long-press for fullscreen</p>
   <!-- <nav> -->
 
 <div class="button-row">
@@ -37,8 +37,7 @@
     <form method="dialog" class="editor">
       <header class="editor-head">
         <h2>Edit Animation <span id="editorSlot"></span></h2>
-      </header>
-      
+      </header>     
       
       <div class="editor-body">
         <div class="preview-wrap">
@@ -50,12 +49,13 @@
                   
           <div class="mini-info">
             <img id="liveMini" class="thumb-mini" alt="mini preview">
-            <span class="mini-label">Current image</span>
-            <span id="editorFileSize" class="mini-size">–</span>
+            <span class="mini-label">Current image: </span>
+            <span id="editorFileSize" class="mini-size">0 KB</span>
+          </div>       
+          <div class="totals">
+            <div class="row"><span class="key">Animations</span><span id="animTotal" class="val">0 KB</span></div>
+            <div class="row"><span class="key">Overall</span><span id="overallTotal" class="val">0 KB</span></div>
           </div>
-
-
-          
         </div>
 
         <div class="fields">
@@ -80,7 +80,6 @@
             <label><input type="radio" name="mode" value="image" id="modeImage"> Show Image</label>
             <label><input type="radio" name="mode" value="both" id="modeBoth"> Show Both</label>
           </fieldset>
-
 
           <label class="field">
             <span>Message Animation</span>
@@ -116,12 +115,11 @@
       </div>
     </div>
   </template>
-
   
   <!-- Minimum display spec requiement -->
   <div id="specOverlay" style="display:none" class="spec-overlay">
     <div class="spec-card">
-      <h3>Sorry — minimum size required</h3>
+      <h3>Sorry, minimum size required</h3>
       <p>This screen needs at least <strong>1024×600</strong> in <strong>landscape</strong> to work well.</p>
       <p>Rotate your device or use a larger display.</p>
     </div>
