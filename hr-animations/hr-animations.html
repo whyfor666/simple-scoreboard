@@ -8,11 +8,22 @@
 </head>
 <body>
   <header class="appbar">
-  <h1>HR Animations</h1>
-  <p class="app-instructions">Tap to edit · Long‑press to preview</p>
-  <nav>
-    <a class="btn" href="scoreboard.html">🏟 Back to Scoreboard</a>
-    <a class="btn" href="settings.html">⚙ Settings</a>
+  <h1>HR Animations</h1>      
+  <p class="app-instructions">Tap to edit · Long-press for fullscreen preview</p>
+  <!-- <nav> -->
+
+<div class="button-row">
+  <button id="exportBtn">Export Animations</button>
+  <input type="file" id="importFile" accept="application/json" style="display:none">
+  <button type="button" onclick="document.getElementById('importFile').click()">Import Animations</button>
+  <script>
+    function printPage() {window.print();}
+  </script>
+  <input type="button" value="Print" onclick="printPage()" />
+  <button type="button" href="scoreboard.html">🏟 Back to Scoreboard</a>
+</div>
+
+
   </nav>
 </header>
 
@@ -27,7 +38,8 @@
       <header class="editor-head">
         <h2>Edit Animation <span id="editorSlot"></span></h2>
       </header>
-
+      
+      
       <div class="editor-body">
         <div class="preview-wrap">
           <div id="livePreview" class="live-preview">
@@ -35,13 +47,15 @@
             <img id="liveImage" alt="" />
           </div>
           <small class="note">Preview (image overrides message/background)</small>
-
-          
+                  
           <div class="mini-info">
             <img id="liveMini" class="thumb-mini" alt="mini preview">
             <span class="mini-label">Current image</span>
+            <span id="editorFileSize" class="mini-size">–</span>
           </div>
 
+
+          
         </div>
 
         <div class="fields">

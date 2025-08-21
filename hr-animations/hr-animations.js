@@ -9,11 +9,41 @@ const DEFAULT_BG = '#0047ab';
 const DEFAULT_MESSAGE = 'Go Team';
 
 /* ---------- Utilities ---------- */
-function makeWhitePNG(){
-  const c = document.createElement('canvas'); c.width = c.height = 1;
-  const ctx = c.getContext('2d'); ctx.fillStyle = '#ffffff'; ctx.fillRect(0,0,1,1);
+function bytesFromDataURL(dataURL) {
+  try {
+    const i = dataURL.indexOf(',');
+    if (i < 0) return NaN;
+    return atob(dataURL.slice(i + 1)).length; // decoded bytes
+  } catch { return NaN; }
+}
+function formatKB(bytes) {
+  return Number.isFinite(bytes) ? `${Math.round(bytes/1024).toLocaleString()} KB` : '0 KB';
+}
+
+// function makeWhitePNG(){  // 1x1 white pixel
+//   const c = document.createElement('canvas'); 
+//   c.width = c.height = 1;
+//   const ctx = c.getContext('2d'); 
+//   ctx.fillStyle = '#ffffff'; 
+//   ctx.fillRect(0,0,1,1);
+//   return c.toDataURL('image/png');
+// }
+
+function makeWhitePNG(){ // now colorful placeholder (4x2) instead of 1x1 white.
+  const c = document.createElement('canvas');
+  c.width = 4; c.height = 2;
+  const ctx = c.getContext('2d');
+  const colors = ['#000','#00f','#f0f','#0ff', '#f00','#0f0','#ff0','#fff']; // R,G,B,W,C,M,Y,K
+  let i = 0;
+  for (let y = 0; y < 2; y++) {
+    for (let x = 0; x < 4; x++) {
+      ctx.fillStyle = colors[i++];
+      ctx.fillRect(x, y, 1, 1);
+    }
+  }
   return c.toDataURL('image/png');
 }
+
 function contrastText(hex){
   const c = (hex||'#000').replace('#','');
   const r = parseInt(c.slice(0,2),16)/255;
@@ -124,7 +154,7 @@ let editingIndex = null;
 let originalSlot = null;
 
 
-/* Render thumbnails grid */
+/* ----- Render thumbnails grid -----*/
 function render(){
   gridEl.innerHTML = '';
   state.forEach((slot, idx)=>{
@@ -220,33 +250,36 @@ function render(){
     applyHoldToPreview(thumb, ()=> openFullscreenPreview(state[idx]));
     thumb.addEventListener('contextmenu', e=>{ e.preventDefault(); openFullscreenPreview(state[idx]); });
 
-    // image + mini
-    if (slot.img) {
-      tMini.src = slot.img;
-      tMini.style.display = 'block';
-    } else {
-      tMini.style.display = 'none';
+// --- image + mini + background (always show something) ---
+const showMsg = (slot.mode==='message' || slot.mode==='both');
+const showImg = (slot.mode==='image'   || slot.mode==='both');
+
+// Always assign an image (real or placeholder) to both main and mini
+const imgSrc = (slot.img && typeof slot.img === 'string') ? slot.img : PLACEHOLDER_WHITE_IMG;
+setImageIfChanged(tImg,  imgSrc);
+tImg.style.display = showImg ? 'block' : 'none';
+
+setImageIfChanged(tMini, imgSrc);
+tMini.style.display = 'block';
+
+// Background: dark behind images, slot.bg otherwise
+thumb.style.background = showImg ? '#111' : (slot.bg || DEFAULT_BG);
+
+// text overlay
+tText.textContent = slot.message || DEFAULT_MESSAGE;
+tText.style.color = contrastText(slot.bg || DEFAULT_BG);
+tText.style.display = showMsg ? 'flex' : 'none';
+tText.classList.toggle('over-image', showImg && showMsg);
+
+    // --- File-size badge (bottom-left) on the card thumbnail ---
+    let sizeBytes = NaN;
+    if (slot.img && slot.img !== PLACEHOLDER_WHITE_IMG) {
+      sizeBytes = bytesFromDataURL(slot.img);
     }
-    // image (main) visibility; mini handled above
-    // treat white placeholder as "no real image" for BG color
-    const isWhitePlaceholder = !!slot.img && slot.img === PLACEHOLDER_WHITE_IMG;
-    const showMsg = (slot.mode==='message' || slot.mode==='both');
-    const showImg = (slot.mode==='image'   || slot.mode==='both');
-
-    if (!slot.img || isWhitePlaceholder) {
-      thumb.style.background = slot.bg || DEFAULT_BG;
-      tImg.style.display = 'none';
-    } else {
-      thumb.style.background = '#111';
-      tImg.style.display = showImg ? 'block' : 'none';
-    }
-
-    // text overlay
-    tText.textContent = slot.message || DEFAULT_MESSAGE;
-    tText.style.color = contrastText(slot.bg || DEFAULT_BG);
-    tText.style.display = showMsg ? 'flex' : 'none';
-    tText.classList.toggle('over-image', showImg && showMsg && !!slot.img && !isWhitePlaceholder);
-
+    const sizeBadge = document.createElement('div');
+    sizeBadge.className = 'thumb-size-badge';
+    sizeBadge.textContent = formatKB(sizeBytes);
+    thumb.appendChild(sizeBadge);
     gridEl.appendChild(node);
   });
 }
@@ -321,16 +354,29 @@ function isDifferent(a, b){
 function refreshLivePreview(slot){
   const showMsg = (slot.mode === 'message' || slot.mode === 'both');
   const showImg = (slot.mode === 'image'   || slot.mode === 'both');
-  const isWhitePlaceholder = !!slot.img && slot.img === PLACEHOLDER_WHITE_IMG;
-
+  const isPlaceholder = !!slot.img && slot.img === PLACEHOLDER_WHITE_IMG;
+  
   // 1) Set the big preview image and the mini preview
-  setImageIfChanged(liveImage, slot.img);
+  setImageIfChanged(liveImage, slot.img || PLACEHOLDER_WHITE_IMG);
   if (liveMini) liveMini.src = slot.img || PLACEHOLDER_WHITE_IMG;
-
-  // 2) Visibility
-  liveImage.style.display = (showImg && !isWhitePlaceholder) ? 'block' : 'none';
+  
+  // 2) Visibility: allow placeholder to be visible in the editor
+  liveImage.style.display = showImg ? 'block' : 'none';
   liveText.style.display  = showMsg ? 'flex' : 'none';
-  liveText.classList.toggle('over-image', showImg && showMsg && !isWhitePlaceholder);
+  liveText.classList.toggle('over-image', showImg && showMsg);
+  
+  // ... inside refreshLivePreview(slot)    This is for Edit mode
+const sizeEl = document.getElementById('editorFileSize');
+if (sizeEl) {
+  const hasRealImg = !!slot.img && slot.img !== PLACEHOLDER_WHITE_IMG;
+  if (hasRealImg) {
+    const bytes = bytesFromDataURL(slot.img);
+    sizeEl.textContent = formatKB(bytes);
+  } else {
+    // sizeEl.textContent = '–';
+    sizeEl.textContent = '0 KB';
+  }
+}
 
   // 3) Background + text styling
   livePreview.style.background = slot.bg;
@@ -522,39 +568,36 @@ render();
 })();
 
 // --- Function ---
-function openFullscreenPreview(slot){
+  function openFullscreenPreview(slot){
   const showMsg = (slot.mode === 'message' || slot.mode === 'both');
   const showImg = (slot.mode === 'image'   || slot.mode === 'both');
-  const isWhite = !!slot.img && slot.img === PLACEHOLDER_WHITE_IMG;
+  const imgSrc  = (slot.img && typeof slot.img === 'string') ? slot.img : PLACEHOLDER_WHITE_IMG;
 
   // background behind everything
-  fsStage.style.background = slot.bg || DEFAULT_BG;
+  fsStage.style.background = showImg ? '#000' : (slot.bg || DEFAULT_BG);
 
-  // image (same visibility logic as editor)
-  if (showImg && slot.img && !isWhite) {
-    if (fsImg.dataset.src !== slot.img) { fsImg.dataset.src = slot.img; fsImg.src = slot.img; }
+  // image
+  if (showImg) {
+    if (fsImg.dataset.src !== imgSrc) { fsImg.dataset.src = imgSrc; fsImg.src = imgSrc; }
     fsImg.style.display = 'block';
   } else {
     fsImg.style.display = 'none';
   }
 
-  // text (same content + overlay logic as editor)
+  // text
   fsText.textContent = slot.message || DEFAULT_MESSAGE;
   fsText.style.display = showMsg ? 'flex' : 'none';
-  fsText.classList.toggle('over-image', showImg && showMsg && !isWhite);
+  fsText.classList.toggle('over-image', showImg && showMsg);
 
   applyTextAnimClass(fsText, slot.textAnim);
-
-  // show overlay
   fs.classList.add('show');
 
-  // ESC to close
-  const onKey = (e)=>{ if(e.key === 'Escape') { closeFullscreenPreview(); } };
+  const onKey = (e)=>{ if(e.key === 'Escape') closeFullscreenPreview(); };
   window.addEventListener('keydown', onKey, { once:true });
-
-  // click anywhere to close
   fs.onclick = closeFullscreenPreview;
 }
+
+
 function closeFullscreenPreview(){
   fs.classList.remove('show');
   fs.onclick = null;
@@ -576,3 +619,16 @@ function closeFullscreenPreview(){
   window.addEventListener('resize', checkSpec);
   checkSpec();
 })();
+
+// Format bytes -> "123 KB"   This is for Thumbnails page.
+function formatKB(bytes) {
+  return Number.isFinite(bytes) ? `${Math.round(bytes / 1024).toLocaleString()} KB` : '0 KB';
+}
+
+function bytesFromDataURL(dataURL) {
+  try {
+    const i = dataURL.indexOf(',');
+    if (i < 0) return NaN;
+    return atob(dataURL.slice(i + 1)).length; // decoded bytes
+  } catch { return NaN; }
+}

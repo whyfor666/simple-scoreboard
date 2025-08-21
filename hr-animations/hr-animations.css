@@ -81,6 +81,8 @@ nav{display:flex; gap:8px}
   .thumb { touch-action: manipulation; }
 }
 
+
+
 /* This keeps the thumbnail proportions within the thumbnail page */
 .thumb .thumb-mini {
   position: absolute;
@@ -152,6 +154,13 @@ nav{display:flex; gap:8px}
 .mini-info {
   position: relative;       /* make container positioning context */
 }
+
+.mini-info .mini-size {
+  margin-left: 8px;
+  font-size: .9rem;
+  color: var(--muted, #9aa0a6);
+}
+
 
 .card-top{padding:10px 10px 0}
 .card-bottom{padding:10px}
@@ -436,3 +445,26 @@ fieldset label { display:inline-flex; gap:6px; align-items:center; margin-right:
   align-items: center;
   word-break: break-word;
 }
+
+.thumb { position: relative; }
+.thumb-size-badge {
+  position: absolute;
+  left: 6px;
+  bottom: 6px;
+  padding: 2px 6px; 
+  font-size: 12px; 
+  line-height: 1;
+  background: rgba(0,0,0,.65); 
+  color: #fff; 
+  border-radius: 6px;
+  pointer-events: none; 
+  user-select: none;
+}
+.thumbs-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:10px; }
+
+/* Do NOT show the slot-number badge on the editor's upload thumbnails */
+#thumbnails .thumb::before { content: none !important; }
+
+/* Make sure the KB badge sits above the image */
+.thumb-size-badge { z-index: 3; }
+
