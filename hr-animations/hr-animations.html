@@ -4,28 +4,27 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>HR Animations</title>
+  
   <link rel="stylesheet" href="hr-animations.css" />
 </head>
 <body>
   <header class="appbar">
-  <h1>HR Animations</h1>      
-  <p class="app-instructions">Tap to edit · Long-press for fullscreen</p>
-  <!-- <nav> -->
-
-<div class="button-row">
-  <button id="exportBtn">Export Animations</button>
-  <input type="file" id="importFile" accept="application/json" style="display:none">
-  <button type="button" onclick="document.getElementById('importFile').click()">Import Animations</button>
-  <script>
-    function printPage() {window.print();}
-  </script>
-  <input type="button" value="Print" onclick="printPage()" />
-  <button type="button" href="scoreboard.html">🏟 Back to Scoreboard</a>
-</div>
-
-
-  </nav>
-</header>
+    <h1>HR Animations</h1>
+    <p class="app-instructions">Tap to edit · Long-press for fullscreen</p>
+    <nav>  
+      <div class="button-row">
+        <button id="exportBtn">Export Animations</button><br>
+        <input type="file" id="importFile" accept="application/json" style="display:none">
+        <button type="button" onclick="document.getElementById('importFile').click()">Import Animations</button>
+        
+        <!-- <script> function printPage() {window.print();} <input type="button" value="Print" onclick="printPage()" /> </script> -->
+        
+        <button type="button" href="scoreboard.html">🏟 Back to Scoreboard</a>
+        </div>
+      </nav>
+    <span style="text-align: right;">Animations: <strong id="animTotalPrint">0 KB</strong><br>
+    Overall: <strong id="overallTotalPrint">0 KB</strong></span>
+  </header>
 
   <main class="container">
     <!-- <p class="hint">Tap an animation to edit.</p> -->
@@ -47,14 +46,15 @@
           </div>
           <small class="note">Preview (image overrides message/background)</small>
                   
-          <div class="mini-info">
-            <img id="liveMini" class="thumb-mini" alt="mini preview">
-            <span class="mini-label">Current image: </span>
-            <span id="editorFileSize" class="mini-size">0 KB</span>
-          </div>       
+       <div class="mini-info">
+        <div class="mini-wrap checkerboard">
+          <img id="liveMini" class="thumb-mini" alt="mini preview">
+        </div>
+        <span class="mini-label">Current image: </span>
+        <span id="editorFileSize" class="mini-size">0 KB</span>
+      </div>
+
           <div class="totals">
-            <div class="row"><span class="key">Animations</span><span id="animTotal" class="val">0 KB</span></div>
-            <div class="row"><span class="key">Overall</span><span id="overallTotal" class="val">0 KB</span></div>
           </div>
         </div>
 
@@ -108,14 +108,20 @@
     <div class="card">
       <div class="card-top">
         <div class="thumb" data-slot="">
-        <span class="thumb-text"></span>
-        <img class="thumb-img" alt="" />
-        <img class="thumb-mini" alt="" />
+          <div class="thumb-wrap checkerboard">
+            <img class="thumb-img" alt="" />
+            
+  <div class="mini-box checkerboard">
+    <img class="thumb-mini" alt="" />
+  </div>
+
+          </div>
+          <span class="thumb-text"></span>
         </div>  
       </div>
     </div>
   </template>
-  
+
   <!-- Minimum display spec requiement -->
   <div id="specOverlay" style="display:none" class="spec-overlay">
     <div class="spec-card">

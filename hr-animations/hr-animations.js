@@ -38,9 +38,11 @@ function updateStorageTotalsUI() {
   const o = document.getElementById('overallTotal');
   if (a) a.textContent = formatKB(anim);
   if (o) o.textContent = formatKB(total);
+  const ap = document.getElementById('animTotalPrint');
+  const op = document.getElementById('overallTotalPrint');
+  if (ap) ap.textContent = formatKB(anim);
+  if (op) op.textContent = formatKB(total);
 }
-
-
 
 // function makeWhitePNG(){  // 1x1 white pixel
 //   const c = document.createElement('canvas'); 
@@ -186,6 +188,7 @@ function render(){
     const tImg  = node.querySelector('.thumb-img');
     const tMini = node.querySelector('.thumb-mini');
 
+
     // Mini thumbnail: ALWAYS static (first frame). Never animates.
     tMini.style.display = 'none'; // default hidden
     const imgSrcTop = slot.img;
@@ -272,26 +275,29 @@ function render(){
     applyHoldToPreview(thumb, ()=> openFullscreenPreview(state[idx]));
     thumb.addEventListener('contextmenu', e=>{ e.preventDefault(); openFullscreenPreview(state[idx]); });
 
-// --- image + mini + background (always show something) ---
-const showMsg = (slot.mode==='message' || slot.mode==='both');
-const showImg = (slot.mode==='image'   || slot.mode==='both');
+    // --- image + mini + background (always show something) ---
+    const showMsg = (slot.mode==='message' || slot.mode==='both');
+    const showImg = (slot.mode==='image'   || slot.mode==='both');
 
-// Always assign an image (real or placeholder) to both main and mini
-const imgSrc = (slot.img && typeof slot.img === 'string') ? slot.img : PLACEHOLDER_WHITE_IMG;
-setImageIfChanged(tImg,  imgSrc);
-tImg.style.display = showImg ? 'block' : 'none';
+    // Always assign an image (real or placeholder) to both main and mini
+    const imgSrc = (slot.img && typeof slot.img === 'string') ? slot.img : PLACEHOLDER_WHITE_IMG;
+    setImageIfChanged(tImg,  imgSrc);
+    tImg.style.display = showImg ? 'block' : 'none';
 
-setImageIfChanged(tMini, imgSrc);
-tMini.style.display = 'block';
+    setImageIfChanged(tMini, imgSrc);
+    tMini.style.display = 'block';
 
-// Background: dark behind images, slot.bg otherwise
-thumb.style.background = showImg ? '#111' : (slot.bg || DEFAULT_BG);
+    // Background: always the slot color (no black stage)
+    thumb.style.background = slot.bg || DEFAULT_BG;
+    // expose the chosen bg as a CSS variable so print can force it
+    thumb.style.setProperty('--slot-bg', slot.bg || DEFAULT_BG);
 
-// text overlay
-tText.textContent = slot.message || DEFAULT_MESSAGE;
-tText.style.color = contrastText(slot.bg || DEFAULT_BG);
-tText.style.display = showMsg ? 'flex' : 'none';
-tText.classList.toggle('over-image', showImg && showMsg);
+
+    // text overlay
+    tText.textContent = slot.message || DEFAULT_MESSAGE;
+    tText.style.color = contrastText(slot.bg || DEFAULT_BG);
+    tText.style.display = showMsg ? 'flex' : 'none';
+    tText.classList.toggle('over-image', showImg && showMsg);
 
     // --- File-size badge (bottom-left) on the card thumbnail ---
     let sizeBytes = NaN;
@@ -372,8 +378,8 @@ function isDifferent(a, b){
   );
 }
 
-/* Live preview */
-function refreshLivePreview(slot){
+/* Live preview -- this is the Editor mini updater*/
+function refreshLivePreview(slot){  
   const showMsg = (slot.mode === 'message' || slot.mode === 'both');
   const showImg = (slot.mode === 'image'   || slot.mode === 'both');
   const isPlaceholder = !!slot.img && slot.img === PLACEHOLDER_WHITE_IMG;
@@ -381,7 +387,7 @@ function refreshLivePreview(slot){
   // 1) Set the big preview image and the mini preview
   setImageIfChanged(liveImage, slot.img || PLACEHOLDER_WHITE_IMG);
   if (liveMini) liveMini.src = slot.img || PLACEHOLDER_WHITE_IMG;
-  
+
   // 2) Visibility: allow placeholder to be visible in the editor
   liveImage.style.display = showImg ? 'block' : 'none';
   liveText.style.display  = showMsg ? 'flex' : 'none';
@@ -595,8 +601,8 @@ render();
   const showImg = (slot.mode === 'image'   || slot.mode === 'both');
   const imgSrc  = (slot.img && typeof slot.img === 'string') ? slot.img : PLACEHOLDER_WHITE_IMG;
 
-  // background behind everything
-  fsStage.style.background = showImg ? '#000' : (slot.bg || DEFAULT_BG);
+  // Background: always use chosen slot.bg (or default)
+  fsStage.style.background = slot.bg || DEFAULT_BG;
 
   // image
   if (showImg) {
@@ -641,42 +647,3 @@ function closeFullscreenPreview(){
   window.addEventListener('resize', checkSpec);
   checkSpec();
 })();
-
-// // Format bytes -> "123 KB"   This is for Thumbnails page.
-// function formatKB(bytes) {
-//   return Number.isFinite(bytes) ? `${Math.round(bytes / 1024).toLocaleString()} KB` : '0 KB';
-// }
-
-// function bytesFromDataURL(dataURL) {
-//   try {
-//     const i = dataURL.indexOf(',');
-//     if (i < 0) return NaN;
-//     return atob(dataURL.slice(i + 1)).length; // decoded bytes
-//   } catch { return NaN; }
-// }
-
-// function bytesFromDataURL(dataURL) {
-//   try { const i = dataURL.indexOf(','); if (i < 0) return NaN; return atob(dataURL.slice(i+1)).length; }
-//   catch { return NaN; }
-// }
-// function formatKB(bytes) {
-//   return Number.isFinite(bytes) ? `${Math.round(bytes/1024).toLocaleString()} KB` : '0 KB';
-// }
-// function computeStorageTotals(slotsArr) {
-//   let anim = 0, total = 0;
-//   for (const s of (slotsArr || [])) {
-//     const img = s && s.img;
-//     if (!img || img === PLACEHOLDER_WHITE_IMG || typeof img !== 'string' || !img.startsWith('data:')) continue;
-//     const bytes = bytesFromDataURL(img);
-//     total += bytes;
-//     if (/^data:(image\/gif|image\/apng|video\/)/i.test(img)) anim += bytes;
-//   }
-//   return { anim, total };
-// }
-// function updateStorageTotalsUI() {
-//   const { anim, total } = computeStorageTotals(slots);
-//   const a = document.getElementById('animTotal');
-//   const o = document.getElementById('overallTotal');
-//   if (a) a.textContent = formatKB(anim);
-//   if (o) o.textContent = formatKB(total);
-// }

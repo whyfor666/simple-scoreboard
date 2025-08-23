@@ -69,7 +69,7 @@ nav{display:flex; gap:8px}
 /*  min-width: 120px;           /* don’t shrink below this */
 /*  min-height: 68px;           /* matches 16:9 ratio */
   border-radius: 12px;
-  background: #111;
+  /* background: #111; */
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -80,8 +80,6 @@ nav{display:flex; gap:8px}
   /* Helps mobile avoid extra gesture delays */
   .thumb { touch-action: manipulation; }
 }
-
-
 
 /* This keeps the thumbnail proportions within the thumbnail page */
 .thumb .thumb-mini {
@@ -143,7 +141,7 @@ nav{display:flex; gap:8px}
 }
 
 .thumb { position: relative; width:100%; aspect-ratio:16/9; border-radius:12px; overflow:hidden; }
-.thumb .thumb-img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:none; }
+.thumb .thumb-img { position:absolute; inset:0; width:100%; height:100%; object-fit:fill; display:none; }
 .thumb .thumb-text { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; }
 .thumb .thumb-text.over-image {
   color:#fff !important; background:rgba(0,0,0,.3);
@@ -160,7 +158,6 @@ nav{display:flex; gap:8px}
   font-size: .9rem;
   color: var(--muted, #9aa0a6);
 }
-
 
 .card-top{padding:10px 10px 0}
 .card-bottom{padding:10px}
@@ -222,7 +219,7 @@ dialog{border:none; padding:0; background:transparent}
   border: 1px solid #2a2c31;
 }
 .live-preview img{
-  position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:none;
+  position:absolute; inset:0; width:100%; height:100%; object-fit:fill; display:none;
 }
 
 .live-text{
@@ -268,51 +265,6 @@ dialog{border:none; padding:0; background:transparent}
 .fieldset { border:0; padding:0; margin:0 }
 fieldset label { display:inline-flex; gap:6px; align-items:center; margin-right:12px }
 /* Fullscreen preview */
-.fs{
-  position:fixed; inset:0; display:none;
-  align-items:center; justify-content:center;
-  background:rgba(0,0,0,.85);
-  z-index: 10000;
-  cursor: zoom-out; /* tap/click to close */
-}
-.fs.show{ display:flex; }
-
-.fs-stage {
-  position: relative;
-  width: 100vw;
-  height: 100vh;
-  border-radius: 0;
-  border: none;
-  overflow: hidden;
-  background: #000;  /* or slot.bg */
-}
-
-.fs-stage img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;   /* crop to fill the screen */
-}
-
-.fs-stage span {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: clamp(24px, 8vw, 80px);
-  font-weight: 800;
-  text-align: center;
-  color: #fff;
-  text-shadow: 0 2px 6px rgba(0,0,0,.7);
-  z-index: 2;/* fullscreen message text — match editor proportions */
-}
-
-.fs-stage span.over-image{
-  background:rgba(0,0,0,.35);
-  padding:.35em .6em; border-radius:12px;
-}
 
 /* Minimum display spec notice */
 .spec-overlay{
@@ -333,10 +285,10 @@ fieldset label { display:inline-flex; gap:6px; align-items:center; margin-right:
   border-bottom:1px solid #2a2c31;
   position:sticky; top:0; z-index:10;
 }
-.appbar h1{ margin:0; font-size:4rem }
+.appbar h1{ margin:0; font-size:2rem }
 .app-instructions{
   margin:0; flex:1; text-align:center;
-  color:#cbd1d6; font-size:2rem;
+  color:#cbd1d6; font-size:1rem;
 }
 
 /* Fullscreen preview */
@@ -348,31 +300,9 @@ fieldset label { display:inline-flex; gap:6px; align-items:center; margin-right:
   cursor: zoom-out; /* hint: click to close */
 }
 .fs.show{ display:flex; }
-.fs-stage{
-  position:relative;
-  width:min(92vw, 92vh * (16/9));
-  aspect-ratio:16 / 9;
-  border-radius:16px;
-  overflow:hidden;
-  background:#000; /* will be overridden by slot.bg */
-  border:1px solid rgba(255,255,255,.15);
-}
-.fs-stage img{
-  position:absolute; inset:0; width:100%; height:100%;
-  object-fit: contain; /* show full image/GIF without cropping */
-  display:none;
-  z-index:1;
-}
-.fs-stage span{
-  position:absolute; inset:0;
-  display:flex; align-items:center; justify-content:center;
-  font-size:clamp(24px, 6vw, 64px);
-  font-weight:800; text-align:center;
-  color:#fff; text-shadow:0 2px 6px rgba(0,0,0,.7);
-  z-index:2;
-}
+
 .fs-stage span.over-image{
-  background:rgba(0,0,0,.35);
+  background:rgba(0,0,0,0.35);
   padding: 0.35em .6em; border-radius:12px;
 }
 /* ===== Force fullscreen edge-to-edge, override older rules ===== */
@@ -391,7 +321,7 @@ fieldset label { display:inline-flex; gap:6px; align-items:center; margin-right:
   position: absolute; inset: 0;
   width: 100% !important;
   height: 100% !important;
-  object-fit: cover !important;  /* fill, crop edges */
+  object-fit: fill !important;  /* fill, crop edges */
   display: none;                 /* JS toggles to block */
   z-index: 1;
 }
@@ -400,7 +330,7 @@ fieldset label { display:inline-flex; gap:6px; align-items:center; margin-right:
   display: flex; align-items: center; justify-content: center;
   font-size: clamp(24px, 8vw, 84px);
   font-weight: 800; text-align: center;
-  color: #fff; text-shadow: 0 2px 6px rgba(0,0,0,.7);
+  color: #fff; text-shadow: 0 2px 6px rgba(0, 0, 0, 0.7);
   z-index: 2;
 }
 /* Force stretch (no cropping) everywhere */
@@ -454,7 +384,7 @@ fieldset label { display:inline-flex; gap:6px; align-items:center; margin-right:
   padding: 2px 6px; 
   font-size: 12px; 
   line-height: 1;
-  background: rgba(0,0,0,.65); 
+  background: rgba(0,0,0,0.65); 
   color: #fff; 
   border-radius: 6px;
   pointer-events: none; 
@@ -463,7 +393,7 @@ fieldset label { display:inline-flex; gap:6px; align-items:center; margin-right:
 .thumbs-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:10px; }
 
 /* Do NOT show the slot-number badge on the editor's upload thumbnails */
-#thumbnails .thumb::before { content: none !important; }
+/* #thumbnails .thumb::before { content: none !important; } */
 
 /* Make sure the KB badge sits above the image */
 .thumb-size-badge { z-index: 3; }
@@ -472,3 +402,370 @@ fieldset label { display:inline-flex; gap:6px; align-items:center; margin-right:
 .totals .row { display: flex; justify-content: space-between; gap: 8px; }
 .totals .key { color: var(--muted, #9aa0a6); }
 .totals .val { font-weight: 600; }
+
+/* hidden on screen */
+.print-totals { display: none; gap: 0.4in; font-size: 12pt; }
+
+/* --- mini preview box (shared by thumbnails + editor) --- */
+.mini-box {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  width: 64px;           /* adjust if you want larger/smaller minis */
+  height: 36px;          /* keep 16:9 look */
+  border: 1px solid #0002;
+  overflow: hidden;
+  border-radius: 4px;
+  z-index: 2;            /* above image, below slot badge */
+  display: grid;
+  place-items: center;
+}
+.mini-box .thumb-mini {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  background: transparent; /* mini itself has no bg; checkerboard is on the box */
+}
+
+/* checkerboard pattern (applied to .mini-box) */
+@media screen {
+  .checkerboard {
+    background-color: #fff;
+    background-image:
+      linear-gradient(45deg, #dcdcdc 25%, transparent 25%),
+      linear-gradient(-45deg, #dcdcdc 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, #dcdcdc 75%),
+      linear-gradient(-45deg, transparent 75%, #dcdcdc 75%);
+    background-size: 16px 16px;
+    background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+  }
+}
+
+/* print: hide mini altogether (you asked to hide it on paper) */
+@media print {
+  .mini-box { display: none !important; }
+}
+
+/* === Print-only layout & visibility === */
+@page { size: letter portrait; margin: 0.5in; }
+
+
+@media print {
+  body {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}
+
+@media print {
+   
+  /* show in print */
+  .print-totals {
+    display: flex !important;
+    margin: 0 0 0.15in 0.25in;   /* aligns under the title */
+  }
+  .print-totals strong { font-weight: 700; }
+  
+  :root { --bg:transparent; --fg:black; }
+  
+  /* Keep just the title, hide UI chrome */
+  .app-instructions, .button-row, nav, .spec-overlay, .fs, dialog { display: none !important; }
+  .appbar { background:  rgb(0, 0, 0, 0.05) !important; box-shadow: none !important; border: 0 !important; }
+  .appbar h1 { margin: 0 0 0 0.25in !important; font-size: 32pt !important; }
+
+  /* 2 columns for 10 cards (≈5 rows) */
+  .grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 0.1in !important;
+    align-content: start !important;
+  }
+
+  /* Remove outer white frame around thumbnails*/
+  .card {
+    padding: 0 !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    background: transparent;
+    break-inside: avoid !important;
+  }
+
+  /* Thumbnail: no black fill; simple 2px black border */
+  .thumb {
+    position: relative !important;
+    background: transparent !important; 
+    border: 2px solid #000 !important; 
+    outline: none !important;
+    height: 1.6in !important;       /* ~5 rows on Letter */
+  }
+
+  /* Fill the thumb with the main image */
+  .thumb .thumb-img {
+    /* display: block !important; */
+    position: absolute !important; inset: 0 !important;
+    width: 100% !important; height: 100% !important; object-fit: fill !important;
+    background: #fff !important; border: 0 !important;
+  }
+
+  /* Hide mini thumbnail; keep Slot# (::before) and KB */
+  .thumb .thumb-mini { display: none !important; }
+
+  /* Slot# prints above image and visible on white */
+  .thumb::before {
+    z-index: 6 !important;
+    background: rgba(0,0,0,0.5);
+    color: #fff !important;
+    border: 1px solid rgba(255,255,255,0.25);
+  }
+
+  /* KB badge: keep bottom-left; black text on white */
+  .thumb-size-badge {
+    /* top: 6px !important; right: 6px !important; */
+    /* left: auto !important; bottom: auto !important; */
+    background: #fff !important; color: #0040ff !important;
+    border: 2px solid #0af9e1 !important;
+    z-index: 5 !important;
+    font-size: 10pt !important;
+    padding: 2px 4px !important;
+  }
+
+}
+
+/* Checkerboard for transparency – minis only (screen) */
+@media screen {
+  /* classic 8px checker */
+  .checkerboard {
+    background-image:
+      linear-gradient(45deg, #ccc 25%, transparent 25%),
+      linear-gradient(-45deg, #ccc 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, #ccc 75%),
+      linear-gradient(-45deg, transparent 75%, #ccc 75%);
+    background-size: 16px 16px;
+    background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+  }
+
+  /* apply checkerboard behind the mini image squares */
+  .thumb .thumb-mini,
+  #liveMini {
+    background: none;           /* reset any existing bg */
+  }
+  .thumb .thumb-mini.checkerboard,
+  #liveMini.checkerboard {
+    /* the checker shows through transparent pixels of the <img> */
+    background: none;
+  }
+}
+
+/* Mini box: a fixed 16:9 window that clips its child image */
+.mini-box{
+  width: 64px;
+  height: 36px;               /* 16:9 */
+  border: 1px solid #0002;
+  border-radius: 4px;
+  overflow: hidden;           /* prevent “escape” */
+  box-sizing: border-box;     /* include the border in the 64×36 */
+  background: none;
+}
+
+/* The mini image fills the box */
+.mini-box .thumb-mini{
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;          /* fills; change to 'contain' if you prefer letterboxing */
+  background: transparent;
+}
+
+/* Place the mini nicely in the EDITOR row */
+.mini-info{
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.mini-info .mini-box{
+  position: static;           /* not absolute in editor */
+}
+
+/* Place the mini in the bottom-right INSIDE each THUMBNAIL card */
+.thumb{ position: relative; }  /* ensure a positioning context exists */
+.thumb .mini-box{
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+}
+
+/* Checkerboard pattern only for minis (screen only) */
+@media screen{
+  .mini-box.checkerboard{
+    background-color: #fff;
+    background-image:
+      linear-gradient(45deg, #dcdcdc 25%, transparent 25%),
+      linear-gradient(-45deg, #dcdcdc 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, #dcdcdc 75%),
+      linear-gradient(-45deg, transparent 75%, #dcdcdc 75%);
+    background-size: 16px 16px;
+    background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+  }
+}
+
+/* In print, hide the mini entirely (as before) */
+@media print{
+  .mini-box{ display: none !important; }
+}
+
+/* --- STOP CROPPING / TRUNCATION (screen only) --- */
+@media screen {
+  /* Main thumbnail image: show whole image */
+  .thumb .thumb-img {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: fill !important;   /* no crop */
+    background: transparent !important;
+  }
+
+  /* Mini image: also show whole image, confined to the mini box */
+  .mini-box .thumb-mini {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: fill !important;   /* no crop */
+    background: transparent !important;
+  }
+}
+
+/* Minis: remove right/bottom gaps by pinning the image to the box */
+.mini-box { position: relative; }                /* ensure a positioning context */
+.mini-box .thumb-mini{
+  position: absolute; inset: 0;                  /* fill the box exactly */
+  width: 100%; height: 100%;
+  display: block;
+  object-fit: fill;                              /* you said you prefer fill */
+  background: transparent;
+}
+/* Nudge the editor's mini image to bleed by 0.5px and kill the bottom hairline */
+.mini-info .mini-box .thumb-mini {
+  inset: -0.5px;          /* slightly larger than the box on all sides */
+  border-radius: inherit; /* keeps the rounded clip clean */
+}
+
+/* --- Mini previews (used in thumbnails grid and editor) --- */
+
+/* Base mini-box: shared styles */
+.mini-box {
+  border: 1px solid #0002;
+  border-radius: 4px;
+  overflow: hidden;           /* clip image + checkerboard */
+  box-sizing: border-box;
+  background: none;
+  position: relative;
+  display: inline-block;
+}
+
+/* Checkerboard pattern applied to mini-box */
+@media screen {
+  .mini-box.checkerboard {
+    background-color: #fff;
+    background-image:
+      linear-gradient(45deg, #dcdcdc 25%, transparent 25%),
+      linear-gradient(-45deg, #dcdcdc 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, #dcdcdc 75%),
+      linear-gradient(-45deg, transparent 75%, #dcdcdc 75%);
+    background-size: 16px 16px;
+    background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+  }
+}
+
+/* Thumbnail grid: minis are fixed-size, bottom-right of card */
+.thumb {
+  position: relative; /* anchor for absolute positioning */
+}
+.thumb .mini-box {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  width: 64px;
+  height: 36px;      /* fixed 16:9 */
+}
+.thumb .mini-box .thumb-mini {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;   /* stretch to fill the box */
+  display: block;
+  background: transparent;
+}
+
+/* Editor: mini sits inline in the info row, height adapts to aspect */
+.mini-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.mini-info .mini-box {
+  width: 164px;       /* pick a width you like */
+  height: 136px;      /* auto so height follows the image */
+  position: static;  /* no absolute positioning here */
+}
+.mini-info .mini-box .thumb-mini {
+  position: static;
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: fill;  /* don’t stretch; keep aspect */
+  background: transparent;
+}
+
+/* Print: hide minis entirely */
+@media print {
+  .mini-box { display: none !important; }
+}
+
+/* Editor: mini sits inline in the info row, fixed 16:9 box */
+.mini-info .mini-box {
+  width: 64px;
+  height: 36px;       /* fixed same as thumbnails */
+  position: static;
+  flex-shrink: 0;     /* don’t collapse */
+}
+.mini-info .mini-box .thumb-mini {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;   /* or 'contain' if you prefer letterboxing */
+  display: block;
+  background: transparent;
+}
+
+/* === Ensure user-selected backgrounds print === */
+@media print {
+  /* Tell the browser to actually print backgrounds */
+  body {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Do NOT override the per-card background set inline by JS */
+  .thumb {
+    /* remove any earlier print background overrides */
+    background: revert !important;   /* use the inline slot.bg */
+  }
+
+  /* Make sure the image itself doesn't paint a background that hides slot.bg */
+  .thumb .thumb-img {
+    background: transparent !important;
+  }
+}
+@media print {
+  /* tell the browser to print backgrounds */
+  body { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+
+  /* force the per-card background (even if earlier rules set white) */
+  .thumb { background: var(--slot-bg) !important; }
+
+  /* the image itself must not paint a background that hides slot.bg */
+  .thumb .thumb-img { background: transparent !important; }
+}
