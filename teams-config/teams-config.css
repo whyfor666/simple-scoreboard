@@ -1,0 +1,66 @@
+/* Modal shell */
+.modal.hidden { display:none; }
+.modal {
+  position:fixed; inset:0; z-index:1000;
+  display:flex; align-items:center; justify-content:center;
+  background:rgba(0,0,0,.5);
+  backdrop-filter:saturate(120%) blur(2px);
+}
+.modal-card{
+  width:min(900px, 92vw);
+  background:var(--panel-1, #1e1e1e);
+  color:var(--text, #eaeaea);
+  border:1px solid var(--border, #333);
+  border-radius:16px; box-shadow:0 10px 40px rgba(0,0,0,.4);
+  overflow:hidden;
+}
+.modal-header, .modal-footer{
+  display:flex; align-items:center; gap:12px;
+  padding:14px 16px; border-bottom:1px solid var(--border, #333);
+}
+.modal-footer{ border-top:1px solid var(--border, #333); border-bottom:none; }
+.modal-body{ padding:16px; }
+
+.status-pill{
+  margin-left:auto; font-size:.85rem; padding:4px 10px; border-radius:999px;
+  border:1px solid var(--border, #333);
+}
+.status-pill.saved{ background:rgba(0,128,0,.15); }
+.status-pill.unsaved{ background:rgba(255,165,0,.15); }
+
+.editor-grid{
+  display:grid; grid-template-columns: 1fr 1.2fr; gap:16px;
+}
+@media (max-width:900px){
+  .editor-grid{ grid-template-columns: 1fr; }
+}
+
+.field{ display:flex; flex-direction:column; gap:6px; margin-bottom:10px; }
+.field input[type="text"]{
+  height:40px; border:1px solid var(--border, #333); border-radius:10px;
+  background:var(--panel-2, #262626); color:inherit; padding:0 12px; outline:none;
+}
+.field input[type="color"]{ height:40px; width:100%; padding:0; border:1px solid var(--border, #333); border-radius:10px; background:var(--panel-2, #262626); }
+
+.btn{
+  height:40px; padding:0 14px; border-radius:10px; border:1px solid var(--border, #333);
+  background:var(--panel-2, #262626); color:inherit; cursor:pointer;
+}
+.btn[disabled]{ opacity:.5; cursor:not-allowed; }
+.btn.primary{ background:var(--accent, #3a86ff); border-color:transparent; color:white; }
+
+.flex-spacer{ flex:1; }
+
+/* Preview card reusing your card look */
+.team-entry.preview{
+  min-height:220px; display:flex; flex-direction:column; gap:8px;
+  padding:12px; border-radius:12px; border:1px dashed var(--border, #333);
+}
+.team-entry.preview img{
+  max-width:100%; max-height:160px; object-fit:contain;
+  display:block; margin-top:4px; border:2px solid currentColor; border-radius:10px;
+}
+.team-entry.preview .placeholder-box{
+  display:grid; place-items:center; height:160px;
+  border:2px dashed currentColor; border-radius:10px; opacity:.8;
+}

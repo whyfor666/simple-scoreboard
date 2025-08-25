@@ -1,430 +1,235 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Team Settings</title>
+  <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Team Settings</title>
+  <link rel="stylesheet" href="teams-config.css" />
   <style>
+    /* Fallback tokens in case the external CSS misses any */
     :root{
-      --appbar-h: 56px;
-      --bg: #0b0b0b;
-      --panel: #111;
-      --panel-2: #161616;
-      --text: #fff;
-      --muted: #bbb;
-      --border: #2a2a2a;
-      --btn: #222;
-      --btn-hover: #2c2c2c;
-      --accent: #6cc0ff;
-      --ok: #3bb273;
-      --warn: #f2c14e;
-      --err: #e74c3c;
+      --panel-1:#1e1e1e; --panel-2:#262626; --border:#333; --text:#eaeaea; --accent:#3a86ff;
     }
+    body{ margin:0; background:#111; color:var(--text); font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif; }
 
-    html, body {
-      height: 100%;
-      background: var(--bg);
-      color: var(--text);
-      margin: 0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+    /* App bar */
+    .appbar{
+      position:sticky; top:0; z-index:5; display:flex; align-items:center; gap:12px;
+      padding:14px 16px; background:var(--panel-1); border-bottom:1px solid var(--border);
     }
+    .appbar .title{ font-weight:700; }
+    .appbar .center{ margin-left:auto; margin-right:auto; opacity:.8; font-size:.95rem; }
+    .appbar .actions{ display:flex; gap:8px; }
+    .btn{
+      height:36px; padding:0 12px; border-radius:10px; border:1px solid var(--border);
+      background:var(--panel-2); color:inherit; cursor:pointer;
+    }
+    .btn.primary{ background:var(--accent); border-color:transparent; color:#fff; }
+    .container{ max-width:1200px; margin:16px auto; padding:0 12px; }
 
-    /* Sticky app bar (Step 1) */
-    .appbar {
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-      height: var(--appbar-h);
-      display: grid;
-      grid-template-columns: 1fr auto 1fr;
-      align-items: center;
-      padding: 0 12px;
-      background:
-        linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0)) ,
-        var(--panel);
-      border-bottom: 1px solid var(--border);
-      box-shadow:
-        0 2px 8px rgba(0,0,0,0.35),
-        inset 0 1px 0 rgba(255,255,255,0.03);
+    /* Grid */
+    .teams-grid{
+      display:grid; grid-template-columns:repeat(5, minmax(220px, 1fr));
+      gap:10px; justify-items:stretch;
     }
-    .appbar__left {
-      font-weight: 700;
-      font-size: 1rem;
-      letter-spacing: 0.3px;
-    }
-    .appbar__center {
-      justify-self: center;
-      font-size: 0.95rem;
-      color: var(--muted);
-      user-select: none;
-    }
-    .appbar__right {
-      justify-self: end;
-      display: inline-flex;
-      gap: 8px;
-    }
-    .appbar .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 34px;
-      padding: 0 12px;
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      background: var(--btn);
-      color: var(--text);
-      text-decoration: none;
-      font-size: 0.92rem;
-      line-height: 1;
-      transition: transform 120ms ease, background 120ms ease, border-color 120ms ease;
-      will-change: transform;
-    }
-    .appbar .btn:hover { background: var(--btn-hover); border-color: #3a3a3a; }
-    .appbar .btn:active { transform: translateY(1px) scale(0.995); }
+    @media (max-width:1100px){ .teams-grid{ grid-template-columns:repeat(4, minmax(220px,1fr)); } }
+    @media (max-width:880px){  .teams-grid{ grid-template-columns:repeat(3, minmax(220px,1fr)); } }
 
-    .page { padding: 16px; }
+    /* Cards (teams + control tile share the same look) */
+    .team-entry{
+      display:flex; flex-direction:column; gap:8px; padding:12px; border-radius:12px;
+      border:1px solid rgba(255,255,255,.08); user-select:none; min-height:200px;
+      background:var(--panel-1);
+    }
+    .team-entry strong{ font-size:1.05rem; }
+    .team-entry img{
+      max-width:100%; max-height:140px; object-fit:contain;
+      display:block; margin-top:4px; border:2px solid currentColor; border-radius:10px;
+    }
+    .team-entry .placeholder-box{
+      display:grid; place-items:center; height:140px;
+      border:2px dashed currentColor; border-radius:10px; opacity:.85;
+    }
+    .entry-actions{ margin-top:auto; display:flex; gap:8px; }
+    .entry-actions .btn{ height:34px; }
 
-    /* Control Card (Step 2) — styled like your HR Animations “control tile” */
-    .control-card {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 12px;
-      align-items: center;
-      padding: 14px 16px;
-      border-radius: 14px;
-      background:
-        linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0)),
-        var(--panel-2);
-      border: 1px solid var(--border);
-      box-shadow: 0 8px 24px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.04);
-      margin-bottom: 16px;
-    }
-    .control-left {
-      display: grid;
-      gap: 6px;
-    }
-    .control-title {
-      font-weight: 700;
-      letter-spacing: 0.3px;
-      font-size: 1rem;
-    }
-    .metrics {
-      display: grid;
-      grid-template-columns: repeat(3, auto);
-      gap: 14px;
-      align-items: baseline;
-      font-size: 0.95rem;
-    }
-    .metric .label { color: var(--muted); font-size: 0.88rem; }
-    .metric .value { font-variant-numeric: tabular-nums; }
-    .value.ok { color: var(--ok); }
-    .value.warn { color: var(--warn); }
-    .value.err { color: var(--err); }
+    /* Control tile tweaks */
+    .team-entry.control{ cursor:default; }
+    .kb-list{ display:grid; gap:6px; }
+    .kb-row{ display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .kb-row.total{ padding-top:6px; border-top:1px dashed var(--border); font-weight:600; }
 
-    .control-right {
-      display: inline-flex;
-      gap: 8px;
-      justify-self: end;
+    /* Modal (full styles live in teams-config.css; these are safe fallbacks) */
+    .modal.hidden{ display:none; }
+    .modal{ position:fixed; inset:0; z-index:1000; display:flex; align-items:center; justify-content:center;
+            background:rgba(0,0,0,.5); backdrop-filter:saturate(120%) blur(2px); }
+    .modal-card{ width:min(900px, 92vw); background:var(--panel-1); color:var(--text);
+                 border:1px solid var(--border); border-radius:16px; box-shadow:0 10px 40px rgba(0,0,0,.4); overflow:hidden; }
+    .modal-header, .modal-footer{ display:flex; align-items:center; gap:12px; padding:14px 16px; }
+    .modal-header{ border-bottom:1px solid var(--border); }
+    .modal-footer{ border-top:1px solid var(--border); }
+    .modal-body{ padding:16px; }
+    .editor-grid{ display:grid; grid-template-columns:1fr 1.2fr; gap:16px; }
+    @media (max-width:900px){ .editor-grid{ grid-template-columns:1fr; } }
+    .status-pill{ margin-left:auto; font-size:.85rem; padding:4px 10px; border-radius:999px; border:1px solid var(--border); }
+    .status-pill.saved{ background:rgba(0,128,0,.15); }
+    .status-pill.unsaved{ background:rgba(255,165,0,.15); }
+    .field{ display:flex; flex-direction:column; gap:6px; margin-bottom:10px; }
+    .field input[type="text"], .field input[type="color"]{
+      height:40px; border:1px solid var(--border); border-radius:10px; background:var(--panel-2); color:inherit; padding:0 12px; outline:none;
     }
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 36px;
-      padding: 0 12px;
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      background: var(--btn);
-      color: var(--text);
-      text-decoration: none;
-      font-size: 0.92rem;
-      transition: transform 120ms ease, background 120ms ease, border-color 120ms ease;
-    }
-    .btn:hover { background: var(--btn-hover); border-color: #3a3a3a; }
-    .btn:active { transform: translateY(1px) scale(0.995); }
-
-    /* Existing harmonized styles */
-    input, button {
-      font-size: 1rem;
-      padding: 0.5rem 0.7rem;
-      margin-top: 0.5rem;
-      background: var(--btn);
-      color: var(--text);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-    }
-    button:hover { background: var(--btn-hover); }
-    .button-row { margin-top: 1rem; } /* (Not used now; kept in case you revert) */
-
-    #teamsList{
-    display:grid;
-    grid-template-columns:repeat(5, minmax(220px, 1fr));
-    gap:10px;
-    justify-items:stretch;
-    }
-    @media (max-width:1100px){
-    #teamsList{ grid-template-columns:repeat(4, minmax(220px,1fr)); }
-    }
-    @media (max-width:880px){
-    #teamsList{ grid-template-columns:repeat(3, minmax(220px,1fr)); }
-    }
-
-    .team-entry {
-      padding: 1rem;
-      margin: 0.25rem;
-      border-radius: 12px;
-      box-sizing: border-box;
-      width: 250px;
-      flex: 0 0 auto;
-      background: var(--panel-2);
-      border: 1px solid var(--border);
-    }
-
-    .team-entry img, .team-entry .placeholder-box {
-      width: 100px;
-      height: 100px;
-      display: block;
-      margin: 0.5rem auto 0;
-      border: 1px solid;
-      border-radius: 10px;
-      background: #00000020;
-    }
-    .team-entry img { object-fit: contain; }
-
-    .placeholder-box {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.8rem;
-      text-align: center;
-      white-space: nowrap;
-      line-height: 100px;
-    }
-
-    #storageUsage { margin-top: 1rem; }
-
-    /* Modal */
-    #modal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.6);
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-      backdrop-filter: blur(2px);
-    }
-    #modal .modal-content {
-      background: #222;
-      color: white;
-      padding: 1rem 1.25rem;
-      border-radius: 12px;
-      max-width: 320px;
-      margin: auto;
-      text-align: center;
-      position: relative;
-      border: 1px solid var(--border);
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    }
-    #modal.warning .modal-content { background-color: #5a3f00; }
-    #modal.info .modal-content { background-color: #0f3555; }
-    #modal.error .modal-content { background-color: #551010; }
-    #modalIcon { font-size: 2rem; margin-bottom: 0.35rem; }
-
-    h1, h2 { margin: 0.5rem 0 0.75rem; }
-    form label { display: inline-block; margin-top: 0.4rem; }
+    .team-entry.preview{ min-height:220px; border:1px dashed var(--border); }
   </style>
 </head>
 <body>
   <!-- App Bar -->
-  <header class="appbar">
-    <div class="appbar__left">Team Settings</div>
-    <div class="appbar__center">tap to edit</div>
-    <div class="appbar__right">
-      <a class="btn" href="./hr-animations.html" title="Open HR Animations">HR Animations</a>
-      <a class="btn" href="./index.html" title="Open Scoreboard">Scoreboard</a>
+  <div class="appbar">
+    <div class="title">Team Settings</div>
+    <div class="center">Tap a Team to Edit</div>
+    <div class="actions">
+      <button class="btn" id="navAnimations">HR Animations</button>
+      <button class="btn" id="navScoreboard">Scoreboard</button>
     </div>
-  </header>
-
-  <div class="page">
-    <!-- Control Card (KB metrics + Export/Import) -->
-    <section class="control-card" id="controlCard" aria-label="Storage and tools">
-      <div class="control-left">
-        <div class="control-title">Storage & Tools</div>
-        <div class="metrics">
-          <div class="metric">
-            <div class="label">Teams</div>
-            <div class="value" id="teamsKB">0.00 KB</div>
-          </div>
-          <div class="metric">
-            <div class="label">Animations</div>
-            <div class="value" id="animsKB">0.00 KB</div>
-          </div>
-          <div class="metric">
-            <div class="label">Overall Used</div>
-            <div class="value" id="overallKB">0.00 KB</div>
-          </div>
-        </div>
-      </div>
-      <div class="control-right">
-        <button class="btn" id="exportBtn" title="Export teams JSON">Export</button>
-        <input type="file" id="importFile" accept="application/json" style="display:none">
-        <button class="btn" type="button" id="importBtn" title="Import teams JSON">Import</button>
-      </div>
-    </section>
-
-    <!-- Original Form / List -->
-    <form id="teamForm">
-      <label>Team Name:<br> <input type="text" id="teamName" placeholder="e.g., Tigers"></label><br>
-      <label>Team Color:<br> <input type="color" id="teamColor" value="#2b2b2b"></label><br>
-      <label>Team Logo:<br> <input type="file" id="teamLogo" accept="image/*"></label><br>
-      <button type="submit">Add/Update Team</button>
-    </form>
-
-    <h2>Saved Teams</h2>
-    <div id="storageUsage"></div>
-    <div id="teamsList"></div>
   </div>
 
-  <!-- Modal -->
-  <div id="modal" onclick="closeModal()">
-    <div class="modal-content" onclick="event.stopPropagation()">
-      <div id="modalIcon">⚠️</div>
-      <p id="modalMessage"></p>
-      <button onclick="closeModal()">OK</button>
+  <div class="container">
+    <!-- Teams Grid (control tile will be slot #1) -->
+    <section>
+      <div id="teamsList" class="teams-grid"></div>
+    </section>
+  </div>
+
+  <!-- Team Editor Modal -->
+  <div id="teamEditorModal" class="modal hidden" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="teamEditorTitle">
+      <header class="modal-header">
+        <h3 id="teamEditorTitle">Team Editor</h3>
+        <span id="editStatus" class="status-pill saved">Saved</span>
+      </header>
+
+      <div class="modal-body">
+        <div class="editor-grid">
+          <form id="teamEditForm" autocomplete="off">
+            <label class="field">
+              <span>Name</span>
+              <input id="editName" type="text" placeholder="Team name" required />
+            </label>
+
+            <label class="field">
+              <span>Color</span>
+              <input id="editColor" type="color" value="#2b2b2b" />
+            </label>
+
+            <label class="field">
+              <span>Logo</span>
+              <input id="editLogo" type="file" accept="image/*" />
+            </label>
+          </form>
+
+          <!-- Live Preview Card -->
+          <div id="teamPreview" class="team-entry preview"></div>
+        </div>
+      </div>
+
+      <footer class="modal-footer">
+        <button id="btnReset" class="btn" disabled>Reset</button>
+        <div class="flex-spacer" style="flex:1;"></div>
+        <button id="btnCancel" class="btn">Cancel</button>
+        <button id="btnSave" class="btn primary" disabled>Save</button>
+      </footer>
     </div>
   </div>
 
   <script>
-    let teams = JSON.parse(localStorage.getItem('teams') || '[]');
+    // ---------- Utilities ----------
+    const TEAMS_KEY = 'teams';
 
-    let editingIndex = -1;
+    function byteSize(str){ return new Blob([str || '']).size; }
+    function formatKB(bytes){ return (bytes/1024).toFixed(2) + ' KB'; }
 
-    function normalizeName(s) {
-    return (s || '')
-        .normalize('NFKC')
-        .trim()
-        .replace(/\s+/g, ' ')
-        .toLowerCase();
+    function getContrastColor(hex){
+      const c = (hex || '#000').replace('#','');
+      const v = c.length===3 ? c.split('').map(x=>x+x).join('') : c.padEnd(6,'0');
+      const r = parseInt(v.substr(0,2),16), g=parseInt(v.substr(2,2),16), b=parseInt(v.substr(4,2),16);
+      const lum = (0.299*r + 0.587*g + 0.114*b)/255;
+      return lum > 0.57 ? '#000' : '#fff';
     }
 
-    let modalTimeout = null;
-   
-    function showModal(message, icon = '⚠️') {
-      const modal = document.getElementById('modal');
-      const content = modal.querySelector('.modal-content');
-      modal.className = 'modal';
-      content.className = 'modal-content';
-
-      if (icon === '⚠️') modal.classList.add('warning');
-      else if (icon === 'ℹ️') modal.classList.add('info');
-      else if (icon === '❌') modal.classList.add('error');
-
-      document.getElementById('modalMessage').innerHTML = message.replace(/\\n/g, '<br>');
-      document.getElementById('modalIcon').textContent = icon;
-      modal.style.display = 'flex';
-      clearTimeout(modalTimeout);
-      modalTimeout = setTimeout(closeModal, 5000);
+    function normalizeName(s){
+      return (s || '').normalize('NFKC').trim().replace(/\s+/g,' ').toLowerCase();
     }
 
-    function closeModal() {
-      document.getElementById('modal').style.display = 'none';
+    // ---------- Data ----------
+    let teams = [];
+    let editingIndex = -1;           // -1 means adding
+    let originalTeamSnapshot = null; // {name,color,logo}
+    let pendingLogoDataURL = null;   // preview before save
+
+    function loadTeams(){
+      try{
+        const raw = localStorage.getItem(TEAMS_KEY);
+        teams = raw ? JSON.parse(raw) : [];
+        if (!Array.isArray(teams)) teams = [];
+      }catch(e){ teams = []; }
+    }
+    function saveTeams(){
+      localStorage.setItem(TEAMS_KEY, JSON.stringify(teams));
+      updateControlCard();
     }
 
-    function byteSize(str) {
-      return new TextEncoder().encode(str).length;
-    }
-    function fmtKB(bytes) {
-      return (bytes / 1024).toFixed(2) + ' KB';
-    }
-
-    function saveTeams() {
-      try {
-        localStorage.setItem('teams', JSON.stringify(teams));
-      } catch (e) {
-        showModal('Storage full. 5MB max.\\nTry removing large logos or reducing image size.', '❌');
+    // ---------- Storage Counters ----------
+    function calcTeamsBytes(){ return byteSize(localStorage.getItem(TEAMS_KEY)); }
+    function calcAnimationsBytes(){
+      let sum = 0;
+      for (const k of Object.keys(localStorage)){
+        const low = k.toLowerCase();
+        if (low.includes('anim')) sum += byteSize(localStorage.getItem(k));
       }
+      return sum;
+    }
+    function calcOverallBytes(){
+      let sum = 0;
+      for (const k of Object.keys(localStorage)) sum += byteSize(localStorage.getItem(k));
+      return sum;
+    }
+    function updateControlCard(){
+      const akb = document.getElementById('animationsKB');
+      const tkb = document.getElementById('teamsKB');
+      const okb = document.getElementById('overallKB');
+      if (!akb || !tkb || !okb) return; // tile not rendered yet
+      akb.textContent = formatKB(calcAnimationsBytes());
+      tkb.textContent = formatKB(calcTeamsBytes());
+      okb.textContent = formatKB(calcOverallBytes());
     }
 
-    function getContrastColor(hex = '#2b2b2b') {
-      const r = parseInt(hex.substr(1, 2), 16) || 0;
-      const g = parseInt(hex.substr(3, 2), 16) || 0;
-      const b = parseInt(hex.substr(5, 2), 16) || 0;
-      const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-      return brightness > 125 ? 'black' : 'white';
-    }
+    // ---------- Render ----------
+    function renderTeams(){
+      const container = document.getElementById('teamsList');
+      container.innerHTML = '';
 
-    /* ---- Storage metrics (Step 2) ---- */
+      // (A) Control tile as FIRST slot
+      const control = document.createElement('div');
+      control.className = 'team-entry control';
+      control.innerHTML = `
+        <strong>Storage &amp; Tools</strong>
+        <div class="kb-list">
+          <div class="kb-row"><span>Animations Storage</span><span id="animationsKB">0 KB</span></div>
+          <div class="kb-row"><span>Teams Storage</span><span id="teamsKB">0 KB</span></div>
+          <div class="kb-row total"><span>Overall LocalStorage</span><span id="overallKB">0 KB</span></div>
+        </div>
+        <div class="entry-actions">
+          <button class="btn" id="btnExport">Export</button>
+          <button class="btn" id="btnImport">Import</button>
+          <input type="file" id="importFile" accept="application/json" hidden>
+        </div>
+      `;
+      container.appendChild(control);
 
-    // Known/likely keys used by your HR Animations module. Extend if needed.
-    const ANIM_KEYS = [
-      'hrAnimations', 'hrAnimationsData', 'hrAnimationsConfig', 'hrAnimationRows',
-      'animations', 'hr-animations', 'hrThumbs', 'hrEditorState'
-    ];
-
-    function calcTeamsBytes() {
-      // Sum each team entry for a closer-to-UI readout (matches the per-tile “Size”)
-      try {
-        return teams.reduce((sum, t) => sum + byteSize(JSON.stringify(t)), 0);
-      } catch { return 0; }
-    }
-
-    function calcAnimationsBytes() {
-      let total = 0;
-      for (const key of ANIM_KEYS) {
-        const v = localStorage.getItem(key);
-        if (v != null) total += byteSize(v);
-      }
-      return total;
-    }
-
-    function calcLocalStorageBytes() {
-      // Entire localStorage payload (keys + values)
-      let total = 0;
-      for (let i = 0; i < localStorage.length; i++) {
-        const k = localStorage.key(i);
-        const v = localStorage.getItem(k);
-        total += byteSize(k) + byteSize(v || '');
-      }
-      return total;
-    }
-
-    function colorizeOverall(bytes) {
-      // Rough thresholds vs 5MB limit
-      const el = document.getElementById('overallKB');
-      el.classList.remove('ok', 'warn', 'err');
-      const ratio = bytes / (5 * 1024 * 1024);
-      if (ratio < 0.6) el.classList.add('ok');
-      else if (ratio < 0.85) el.classList.add('warn');
-      else el.classList.add('err');
-    }
-
-    function updateControlCard() {
-      const teamsBytes = calcTeamsBytes();
-      const animBytes  = calcAnimationsBytes();
-      const allBytes   = calcLocalStorageBytes();
-
-      document.getElementById('teamsKB').textContent   = fmtKB(teamsBytes);
-      document.getElementById('animsKB').textContent   = fmtKB(animBytes);
-      document.getElementById('overallKB').textContent = fmtKB(allBytes) + ' / ~5120 KB';
-      colorizeOverall(allBytes);
-    }
-
-    /* ---- Teams list/UI ---- */
-
-    function renderTeams() {
-        const container = document.getElementById('teamsList');
-        const storageDisplay = document.getElementById('storageUsage');
-        container.innerHTML = '';
-        let totalBytes = 0;
-
-        // render real teams
-        teams.forEach((team, index) => {
-        const teamData = JSON.stringify(team);
-        const size = byteSize(teamData);
-        totalBytes += size;
+      // (B) Real team tiles
+      teams.forEach((team, index) => {
         const bg = team.color || '#1f1f1f';
         const textColor = getContrastColor(bg);
+        const sizeKB = formatKB(byteSize(JSON.stringify(team)));
 
         const div = document.createElement('div');
         div.className = 'team-entry';
@@ -432,153 +237,257 @@
         div.style.color = textColor;
 
         const imageOrPlaceholder = team.logo
-        ? `<img src="${team.logo}" alt="Logo" style="border-color:${textColor}">`
-        : `<div class="placeholder-box" style="border-color:${textColor}">No file selected.</div>`;
+          ? `<img src="${team.logo}" alt="Logo" style="border-color:${textColor}">`
+          : `<div class="placeholder-box" style="border-color:${textColor}">No file selected.</div>`;
 
-        div.innerHTML = ` 
-        <strong>${team.name || 'Untitled Team'}</strong><br>
-        Color: <span>${bg}</span><br>
-        ${imageOrPlaceholder}<br>
-        Size: ${(size / 1024).toFixed(2)} KB<br>
-    <!--   <button onclick="event.stopPropagation(); deleteTeam(${index})">Delete</button> -->
-    <!--   <button onclick="event.stopPropagation(); editTeam(${index})">Edit</button> -->
+        div.innerHTML = `
+          <strong>${team.name || 'Untitled Team'}</strong>
+          <div>Color: <span>${bg}</span></div>
+          <div>Size: <span>${sizeKB}</span></div>
+          ${imageOrPlaceholder}
+          <div class="entry-actions">
+            <button class="btn" data-action="delete">Delete</button>
+            <button class="btn" data-action="edit">Edit</button>
+          </div>
         `;
 
-        // tap/click anywhere on the card to edit (matches “tap to edit” in app bar)
-        div.addEventListener('click', () => editTeam(index));
-        container.appendChild(div);
+        div.addEventListener('click', (e) => {
+          const action = (e.target && e.target.dataset && e.target.dataset.action) || '';
+          if (action === 'delete'){
+            e.stopPropagation();
+            if (confirm('Delete this team?')) deleteTeam(index);
+            return;
+          }
+          openTeamEditor(index);
         });
 
-        // add placeholders up to 14
-        const totalSlots = 14;
-        const toAdd = Math.max(0, totalSlots - teams.length);
-        for (let i = 0; i < toAdd; i++) {
-            const div = document.createElement('div');
-            div.className = 'team-entry';
-            div.style.backgroundColor = 'var(--panel-2)';
-            div.innerHTML = `
-            <strong>Empty slot</strong><br>
-            <span class="placeholder-box" style="border-color:var(--border)">Tap to add</span><br>
-            <button onclick="event.stopPropagation(); /* focuses form */ document.getElementById('teamName').focus();">Add</button>
-            `;
-            // clicking the tile focuses the add form
-            div.addEventListener('click', () => document.getElementById('teamName').focus());
-            container.appendChild(div);
-        }
+        container.appendChild(div);
+      });
 
-        storageDisplay.innerHTML = `<p>Total Storage Used (teams only): ${(totalBytes / 1024).toFixed(2)} KB</p>`;
-        updateControlCard();
-        
+      // (C) Placeholders to reach 14 TEAM slots (total grid = 1 control + up to 14 teams = 15 tiles)
+      const TEAM_SLOTS = 14;
+      const toAdd = Math.max(0, TEAM_SLOTS - teams.length);
+      for (let i=0;i<toAdd;i++){
+        const div = document.createElement('div');
+        div.className = 'team-entry';
+        div.style.backgroundColor = 'var(--panel-2)';
+        div.style.color = 'var(--text)';
+        div.innerHTML = `
+          <strong>Empty slot</strong>
+          <div class="placeholder-box" style="border-color:var(--border)">Tap to add</div>
+          <div class="entry-actions">
+            <button class="btn" data-action="add">Add</button>
+          </div>
+        `;
+        div.addEventListener('click', () => openTeamEditor(-1));
+        container.appendChild(div);
+      }
+
+      // Update counters and wire the control tile’s buttons
+      updateControlCard();
+      wireControlTile();
     }
 
-    function deleteTeam(index) {
-    teams.splice(index, 1);
-    if (editingIndex === index) editingIndex = -1;
-    saveTeams();
-    renderTeams();
+    function wireControlTile(){
+      const exportBtn = document.getElementById('btnExport');
+      const importBtn = document.getElementById('btnImport');
+      const importFile = document.getElementById('importFile');
+      if (!exportBtn || !importBtn || !importFile) return;
+
+      exportBtn.onclick = exportTeams;
+      importBtn.onclick = () => importFile.click();
+      importFile.onchange = (e) => {
+        const f = e.target.files[0];
+        if (f) importTeamsFromFile(f);
+        e.target.value = '';
+      };
     }
 
-    function editTeam(index) {
-    const team = teams[index];
-    editingIndex = index; // track which row we are editing
-    document.getElementById('teamName').value  = team.name || '';
-    document.getElementById('teamColor').value = team.color || '#2b2b2b';
-    document.getElementById('teamLogo').value  = ''; // file inputs cannot be prefilled
-    showModal(
-        'Edit values loaded for: ' +
-        '<strong>' + (team.name || 'Untitled Team') + '</strong>' +
-        '\n\nLogo must be re-selected if changed.',
-        'ℹ️'
-    );
+    function deleteTeam(index){
+      teams.splice(index,1);
+      if (editingIndex === index) editingIndex = -1;
+      saveTeams();
+      renderTeams();
     }
 
-    document.getElementById('teamForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const name  = document.getElementById('teamName').value.trim();
-    const color = document.getElementById('teamColor').value || '#2b2b2b';
-    const file  = document.getElementById('teamLogo').files[0];
-
-    if (!name) return showModal('Team name required', '⚠️');
-
-    const norm = normalizeName(name);
-
-    // Find a conflicting row *other than the one we're editing*
-    const conflictIndex = teams.findIndex((t, i) =>
-        normalizeName(t.name) === norm && i !== editingIndex
-    );
-    if (conflictIndex !== -1) {
-        return showModal(`A team named "${teams[conflictIndex].name}" already exists.`, '⚠️');
+    // ---------- Modal Editor ----------
+    function getCurrentEditValues(){
+      return {
+        name: document.getElementById('editName').value.trim(),
+        color: document.getElementById('editColor').value || '#2b2b2b',
+        logo: pendingLogoDataURL != null
+          ? pendingLogoDataURL
+          : (originalTeamSnapshot ? originalTeamSnapshot.logo : null)
+      };
     }
 
-  const finalize = (logoBase64) => {
-    const teamData = { name, color, logo: logoBase64 || null };
+    function renderPreview(team){
+      const preview = document.getElementById('teamPreview');
+      const bg = team.color || '#2b2b2b';
+      const textColor = getContrastColor(bg);
+      preview.style.backgroundColor = bg;
+      preview.style.color = textColor;
 
-    if (editingIndex >= 0) {
-      teams[editingIndex] = teamData;      // update same row
-    } else {
-      teams.push(teamData);                 // add new
+      const imageOrPlaceholder = team.logo
+        ? `<img src="${team.logo}" alt="Logo">`
+        : `<div class="placeholder-box">No file selected.</div>`;
+
+      preview.innerHTML = `
+        <strong>${team.name || 'Untitled Team'}</strong>
+        ${imageOrPlaceholder}
+      `;
     }
 
-    saveTeams();
-    renderTeams();
-    editingIndex = -1;                      // exit edit mode
-    document.getElementById('teamForm').reset();
-  };
+    function updateDirtyState(){
+      const cur = getCurrentEditValues();
+      const was = originalTeamSnapshot || { name:'', color:'#2b2b2b', logo:null };
+      const dirty = (
+        normalizeName(cur.name) !== normalizeName(was.name) ||
+        (cur.color || '') !== (was.color || '') ||
+        (cur.logo || '')  !== (was.logo  || '')
+      );
+      const pill = document.getElementById('editStatus');
+      pill.classList.toggle('unsaved', dirty);
+      pill.classList.toggle('saved', !dirty);
+      pill.textContent = dirty ? 'Unsaved' : 'Saved';
+      document.getElementById('btnSave').disabled  = !dirty;
+      document.getElementById('btnReset').disabled = !dirty;
+    }
 
-  if (file) {
-    if (file.size > 2 * 1024 * 1024) return showModal('Please upload images smaller than 2MB.', '⚠️');
-    const reader = new FileReader();
-    reader.onload = () => finalize(reader.result);
-    reader.readAsDataURL(file);
-  } else {
-    // Keep existing logo when editing; null for new rows
-    const currentLogo = editingIndex >= 0 ? (teams[editingIndex].logo || null) : null;
-    finalize(currentLogo);
-  }
-});
+    function openTeamEditor(index){
+      editingIndex = index; // -1 => adding new
+      const t = (index >= 0 && teams[index]) ? teams[index] : { name:'', color:'#2b2b2b', logo:null };
+      originalTeamSnapshot = { name: t.name || '', color: t.color || '#2b2b2b', logo: t.logo || null };
+      pendingLogoDataURL = null;
 
+      document.getElementById('editName').value  = originalTeamSnapshot.name;
+      document.getElementById('editColor').value = originalTeamSnapshot.color;
+      document.getElementById('editLogo').value  = '';
 
-    // Control card: Export/Import
-    document.getElementById('exportBtn').addEventListener('click', () => {
-      const data = JSON.stringify(teams);
-      const blob = new Blob([data], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
+      document.getElementById('teamEditorModal').classList.remove('hidden');
+      renderPreview(getCurrentEditValues());
+      updateDirtyState();
+
+      setTimeout(()=>document.getElementById('editName').focus(), 0);
+    }
+
+    function closeTeamEditor(){
+      document.getElementById('teamEditorModal').classList.add('hidden');
+      editingIndex = -1;
+      originalTeamSnapshot = null;
+      pendingLogoDataURL = null;
+    }
+
+    // ---------- Export / Import ----------
+    function exportTeams(){
+      const data = JSON.stringify(teams, null, 2);
+      const blob = new Blob([data], {type:'application/json'});
+      const url  = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'teams-backup.json';
+      a.download = 'teams-export.json';
+      document.body.appendChild(a);
       a.click();
-    });
+      a.remove();
+      URL.revokeObjectURL(url);
+    }
 
-    document.getElementById('importBtn').addEventListener('click', () => {
-      document.getElementById('importFile').click();
-    });
-
-    document.getElementById('importFile').addEventListener('change', (event) => {
-      const file = event.target.files[0];
-      if (!file) return;
-
+    function importTeamsFromFile(file){
       const reader = new FileReader();
       reader.onload = () => {
-        try {
-          const parsed = JSON.parse(reader.result);
-          if (!Array.isArray(parsed)) throw new Error();
-          teams = parsed;
+        try{
+          const arr = JSON.parse(reader.result);
+          if (!Array.isArray(arr)) throw new Error('Invalid format');
+          const cleaned = arr.map(t => ({
+            name: (t && t.name) ? String(t.name) : '',
+            color: (t && t.color) ? String(t.color) : '#2b2b2b',
+            logo: (t && t.logo) ? String(t.logo) : null
+          }));
+          teams = cleaned;
           saveTeams();
           renderTeams();
-        } catch (e) {
-          showModal('Invalid file format.\\nMake sure you uploaded a valid teams-backup.json file.', '❌');
+          alert('Import complete.');
+        }catch(err){
+          alert('Import failed: ' + err.message);
         }
       };
       reader.readAsText(file);
-      // reset input so selecting the same file again will still trigger
-      event.target.value = '';
+    }
+
+    // ---------- App init & listeners ----------
+    document.addEventListener('DOMContentLoaded', () => {
+      // nav buttons (adjust paths as needed)
+      document.getElementById('navAnimations').addEventListener('click', () => {
+        // window.location.href = './hr-animations.html';
+      });
+      document.getElementById('navScoreboard').addEventListener('click', () => {
+        // window.location.href = './index.html';
+      });
+
+      loadTeams();
+      renderTeams(); // builds control tile, teams, placeholders, counters
+
+      // Modal input listeners
+      const nameEl  = document.getElementById('editName');
+      const colorEl = document.getElementById('editColor');
+      const logoEl  = document.getElementById('editLogo');
+      const btnCancel = document.getElementById('btnCancel');
+      const btnReset  = document.getElementById('btnReset');
+      const btnSave   = document.getElementById('btnSave');
+
+      nameEl.addEventListener('input', () => { renderPreview(getCurrentEditValues()); updateDirtyState(); });
+      colorEl.addEventListener('input', () => { renderPreview(getCurrentEditValues()); updateDirtyState(); });
+      logoEl.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file){ pendingLogoDataURL = null; renderPreview(getCurrentEditValues()); updateDirtyState(); return; }
+        if (file.size > 2 * 1024 * 1024){ alert('Please upload images smaller than 2MB.'); e.target.value = ''; return; }
+        const reader = new FileReader();
+        reader.onload = () => { pendingLogoDataURL = reader.result; renderPreview(getCurrentEditValues()); updateDirtyState(); };
+        reader.readAsDataURL(file);
+      });
+
+      btnCancel.addEventListener('click', () => { closeTeamEditor(); });
+      btnReset.addEventListener('click', () => {
+        if (!originalTeamSnapshot) return;
+        nameEl.value  = originalTeamSnapshot.name || '';
+        colorEl.value = originalTeamSnapshot.color || '#2b2b2b';
+        logoEl.value  = '';
+        pendingLogoDataURL = null;
+        renderPreview(getCurrentEditValues());
+        updateDirtyState();
+      });
+      btnSave.addEventListener('click', () => {
+        const { name, color, logo } = getCurrentEditValues();
+        if (!name){ alert('Team name required'); return; }
+
+        const norm = normalizeName(name);
+        const conflictIndex = teams.findIndex((t, i) => normalizeName(t.name) === norm && i !== editingIndex);
+        if (conflictIndex !== -1){
+          alert(`A team named "${teams[conflictIndex].name}" already exists.`);
+          return;
+        }
+
+        if (editingIndex >= 0){
+          teams[editingIndex] = { name, color, logo: logo || null };
+        }else{
+          teams.push({ name, color, logo: logo || null });
+        }
+        saveTeams();
+        renderTeams();
+        closeTeamEditor();
+      });
+
+      // ESC to close, Ctrl/Cmd+Enter to save
+      document.addEventListener('keydown', (e) => {
+        const modalOpen = !document.getElementById('teamEditorModal').classList.contains('hidden');
+        if (!modalOpen) return;
+        if (e.key === 'Escape'){ e.preventDefault(); closeTeamEditor(); }
+        if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)){
+          e.preventDefault();
+          if (!document.getElementById('btnSave').disabled) document.getElementById('btnSave').click();
+        }
+      });
     });
-
-    // Update totals when other tabs windows change localStorage
-    window.addEventListener('storage', updateControlCard);
-
-    // Initial render
-    renderTeams();
   </script>
 </body>
 </html>
