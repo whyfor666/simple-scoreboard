@@ -32,27 +32,40 @@ function computeStorageTotals() {
   return { anim, total };
 }
 
+function computeTeamsStorageKB() {
+  try {
+    const raw = localStorage.getItem('ss.teams.v1');
+    if (!raw) return 0;
+    // Approximate size in bytes = UTF-8 string length
+    return new Blob([raw]).size / 1024;
+  } catch {
+    return 0;
+  }
+}
+
+
 function updateStorageTotalsUI() {
-  const text = formatKB;
+  const fmt = formatKB;
   const { anim, total } = computeStorageTotals();
-  
-  // Main header
-  const a = document.getElementById('animTotal');
-  const o = document.getElementById('overallTotal');
-  if (a) a.textContent = formatKB(anim);
-  if (o) o.textContent = formatKB(total);
+  const teamsKB = computeTeamsStorageKB();
 
-  // Print header
-  const ap = document.getElementById('animTotalPrint');
-  const op = document.getElementById('overallTotalPrint');
-  if (ap) ap.textContent = formatKB(anim);
-  if (op) op.textContent = formatKB(total);
+  // Header (if present)
+  const a  = document.getElementById('animTotal');            if (a)  a.textContent  = fmt(anim);
+  const o  = document.getElementById('overallTotal');         if (o)  o.textContent  = fmt(total);
+  const ap = document.getElementById('animTotalPrint');       if (ap) ap.textContent = fmt(anim);
+  const op = document.getElementById('overallTotalPrint');    if (op) op.textContent = fmt(total);
 
-  // Editor header
-  const ae = document.getElementById('animTotalEditor');
-  const oe = document.getElementById('overallTotalEditor');
-  if (ae) ae.textContent = text(anim);
-  if (oe) oe.textContent = text(total);
+  // Editor header (if present)
+  const ae = document.getElementById('animTotalEditor');      if (ae) ae.textContent = fmt(anim);
+  const oe = document.getElementById('overallTotalEditor');   if (oe) oe.textContent = fmt(total);
+
+  // Control card (grid)
+  const ag = document.getElementById('animTotalGrid');
+  if (ag) ag.textContent = fmt(anim);
+  const og = document.getElementById('overallTotalGrid');
+  if (og) og.textContent = fmt(total);
+  const tg = document.getElementById('teamsTotalGrid');
+  if (tg) tg.textContent = `${Math.round(teamsKB).toLocaleString()} KB`;
 }
 
 // function makeWhitePNG(){  // 1x1 white pixel
@@ -191,7 +204,11 @@ let originalSlot = null;
 
 /* ----- Render thumbnails grid -----*/
 function render(){
-  gridEl.innerHTML = '';
+  gridEl.innerHTML = ''; 
+  // ➊ Add control card first
+  gridEl.appendChild(createControlCard());
+
+  // ➋ Then add the 10 animation cards as before
   state.forEach((slot, idx)=>{
     const node  = tpl.content.firstElementChild.cloneNode(true);
     const thumb = node.querySelector('.thumb');
@@ -739,3 +756,69 @@ async function importAnimationsFromFile(file) {
     });
   }
 })();
+
+
+// Build the control card DOM
+function createControlCard() {
+  const card  = document.createElement('div');
+  card.className = 'card control';
+
+  const top   = document.createElement('div');
+  top.className = 'card-top';
+
+  const thumb = document.createElement('div');
+  thumb.className = 'thumb control-thumb';
+
+  const wrap  = document.createElement('div');
+  wrap.className = 'control-wrap';
+
+  const title = document.createElement('div');
+  title.className = 'control-title';
+  title.textContent = 'Animations Storage';
+
+  const totals = document.createElement('div');
+  totals.className = 'control-totals';
+  totals.innerHTML = `
+  <div><span class="key">Teams:</span> <strong id="teamsTotalGrid">0 KB</strong></div>
+  <div><span class="key">Animations:</span> <strong id="animTotalGrid">0 KB</strong></div>
+  <div><span class="key">Overall Used:</span> <strong id="overallTotalGrid">0 KB</strong>/ ~5120 KB</div>
+  `;
+
+  const actions = document.createElement('div');
+  actions.className = 'control-actions';
+
+  const exportBtn = document.createElement('button');
+  exportBtn.className = 'btn primary';
+  exportBtn.textContent = 'Export';
+  exportBtn.addEventListener('click', (e) => { e.preventDefault(); exportAnimations(); });
+
+  const importBtn = document.createElement('button');
+  importBtn.className = 'btn';
+  importBtn.textContent = 'Import';
+
+  // hidden file input lives INSIDE the control card
+  const importInput = document.createElement('input');
+  importInput.type = 'file';
+  importInput.accept = 'application/json';
+  importInput.style.display = 'none';
+  importInput.addEventListener('change', () => {
+    const f = importInput.files?.[0];
+    if (f) importAnimationsFromFile(f).finally(() => (importInput.value = ''));
+  });
+
+  importBtn.addEventListener('click', (e) => { e.preventDefault(); importInput.click(); });
+
+  actions.appendChild(exportBtn);
+  actions.appendChild(importBtn);
+
+  wrap.appendChild(title);
+  wrap.appendChild(totals);
+  wrap.appendChild(actions);
+  wrap.appendChild(importInput); // keep input in DOM
+
+  thumb.appendChild(wrap);
+  top.appendChild(thumb);
+  card.appendChild(top);
+  return card;
+}
+

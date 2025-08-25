@@ -776,3 +776,47 @@ fieldset label { display:inline-flex; gap:6px; align-items:center; margin-right:
   /* the image itself must not paint a background that hides slot.bg */
   .thumb .thumb-img { background: transparent !important; }
 }
+
+/* Control card uses the same aspect box for alignment */
+.control .control-thumb {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  background: var(--card);
+  border: 1px dashed #2a2c31;   /* subtle diff so it reads as a “panel” */
+}
+
+.control-wrap {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  text-align: center;
+}
+
+.control-title {
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.control-totals .key {
+  color: var(--muted);
+  margin-right: 6px;
+}
+
+.control-actions {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Hide old header buttons/totals */
+/* .appbar .button-row { display: none !important; } */
+.appbar [id="animTotalPrint"],
+.appbar [id="overallTotalPrint"] { display: none !important; }
+
+

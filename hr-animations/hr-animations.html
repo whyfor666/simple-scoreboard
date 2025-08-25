@@ -13,17 +13,17 @@
       <p class="app-instructions">Tap to edit · Long-press for fullscreen</p>
       <nav>  
         <div class="button-row">
-          <button id="exportBtn">Export Animations</button><br>
-          <input type="file" id="importFile" accept="application/json" style="display:none">
-          <button type="button" onclick="document.getElementById('importFile').click()">Import Animations</button>
-          
-          <!-- <script> function printPage() {window.print();} <input type="button" value="Print" onclick="printPage()" /> </script> -->
-          
-          <button type="button" href="scoreboard.html">🏟 Back to Scoreboard</a>
+          <button id="teamsBtn" type="button" href="./temas-confg/teams-config.html">Teams Config</button>
+          <!-- <button id="animBtn"  type="button" href="./hr-animations/hr-animations.html">HR Animations</button> -->
+          <button id="scoreBtn" type="button" href="./scoreboard.html">🏟 Scoreboard</a>
+           
+            <!-- <script> function printPage() {window.print();} <input type="button" value="Print" onclick="printPage()" /> </script> -->
           </div>
         </nav>
-        <span style="text-align: right;">Animations: <strong id="animTotalPrint">0 KB</strong><br>
-          Overall: <strong id="overallTotalPrint">0 KB</strong></span>
+        <span style="text-align: right;"> 
+          <strong id="animTotalPrint">0 KB</strong><br>
+          <strong id="overallTotalPrint">0 KB</strong>
+        </span>
         </header>
         
         <main class="container">
