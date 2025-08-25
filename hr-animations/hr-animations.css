@@ -617,13 +617,20 @@ fieldset label { display:inline-flex; gap:6px; align-items:center; margin-right:
 /* --- STOP CROPPING / TRUNCATION (screen only) --- */
 @media screen {
   /* Main thumbnail image: show whole image */
-  .thumb .thumb-img {
-    display: block !important;
-    width: 100% !important;
-    height: 100% !important;
-    object-fit: fill !important;   /* no crop */
-    background: transparent !important;
-  }
+/* default: hide image unless explicitly told to show */
+.thumb .thumb-img {
+  position: absolute; inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: fill !important;
+  display: none; /* keep default hidden */
+  background: transparent !important;
+}
+
+/* only show image when the card has .show-img */
+.thumb.show-img .thumb-img {
+  display: block !important;
+}
 
   /* Mini image: also show whole image, confined to the mini box */
   .mini-box .thumb-mini {

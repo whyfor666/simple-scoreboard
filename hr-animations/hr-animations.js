@@ -33,15 +33,26 @@ function computeStorageTotals() {
 }
 
 function updateStorageTotalsUI() {
+  const text = formatKB;
   const { anim, total } = computeStorageTotals();
+  
+  // Main header
   const a = document.getElementById('animTotal');
   const o = document.getElementById('overallTotal');
   if (a) a.textContent = formatKB(anim);
   if (o) o.textContent = formatKB(total);
+
+  // Print header
   const ap = document.getElementById('animTotalPrint');
   const op = document.getElementById('overallTotalPrint');
   if (ap) ap.textContent = formatKB(anim);
   if (op) op.textContent = formatKB(total);
+
+  // Editor header
+  const ae = document.getElementById('animTotalEditor');
+  const oe = document.getElementById('overallTotalEditor');
+  if (ae) ae.textContent = text(anim);
+  if (oe) oe.textContent = text(total);
 }
 
 // function makeWhitePNG(){  // 1x1 white pixel
@@ -188,7 +199,6 @@ function render(){
     const tImg  = node.querySelector('.thumb-img');
     const tMini = node.querySelector('.thumb-mini');
 
-
     // Mini thumbnail: ALWAYS static (first frame). Never animates.
     tMini.style.display = 'none'; // default hidden
     const imgSrcTop = slot.img;
@@ -276,12 +286,16 @@ function render(){
     thumb.addEventListener('contextmenu', e=>{ e.preventDefault(); openFullscreenPreview(state[idx]); });
 
     // --- image + mini + background (always show something) ---
-    const showMsg = (slot.mode==='message' || slot.mode==='both');
+        const showMsg = (slot.mode==='message' || slot.mode==='both');
     const showImg = (slot.mode==='image'   || slot.mode==='both');
+
+    // toggle card-level class for CSS to respect
+    thumb.classList.toggle('show-img', showImg);
 
     // Always assign an image (real or placeholder) to both main and mini
     const imgSrc = (slot.img && typeof slot.img === 'string') ? slot.img : PLACEHOLDER_WHITE_IMG;
-    setImageIfChanged(tImg,  imgSrc);
+    setImageIfChanged(tImg, imgSrc);
+    // let CSS decide visibility via .show-img; keep explicit for safety
     tImg.style.display = showImg ? 'block' : 'none';
 
     setImageIfChanged(tMini, imgSrc);
@@ -646,4 +660,82 @@ function closeFullscreenPreview(){
 
   window.addEventListener('resize', checkSpec);
   checkSpec();
+})();
+
+/* ===== Export / Import ===== */
+
+// Nicely formatted timestamp for filenames
+function tsStamp() {
+  const d = new Date();
+  const pad = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}`;
+}
+
+// Validate & normalize an animations array to exactly 10 entries using withDefaults()
+function normalizeAnimationsArray(arr) {
+  if (!Array.isArray(arr)) return null;
+  const out = Array.from({ length: 10 }, (_, i) => withDefaults(arr[i] ?? {}));
+  return out;
+}
+
+// Export: download current state as JSON (with a small wrapper for metadata)
+function exportAnimations() {
+  const { anim, total } = computeStorageTotals();
+  const payload = {
+    version: 1,
+    storageKey: STORAGE_KEY,
+    exportedAt: new Date().toISOString(),
+    bytes: { animations: anim, overall: total },
+    data: state
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `hr-animations-backup-${tsStamp()}.json`;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => {
+    URL.revokeObjectURL(a.href);
+    document.body.removeChild(a);
+  }, 0);
+}
+
+// Import: read file, accept wrapper or raw array, normalize, save, re-render
+async function importAnimationsFromFile(file) {
+  try {
+    const text = await file.text();
+    const json = JSON.parse(text);
+
+    // Accept either { data: [...] } wrapper or a raw array
+    const raw = Array.isArray(json) ? json : (Array.isArray(json?.data) ? json.data : null);
+    const normalized = normalizeAnimationsArray(raw);
+    if (!normalized) throw new Error('Invalid file format');
+
+    state = normalized;
+    saveAnimations(state);
+    render();
+    alert('Animations imported successfully.');
+  } catch (err) {
+    console.error(err);
+    alert('Import failed: ' + (err?.message || 'Invalid file'));
+  }
+}
+
+// Wire up buttons/inputs that already exist in your HTML
+(function wireExportImportUI() {
+  const exportBtn = document.getElementById('exportBtn');
+  const importInput = document.getElementById('importFile');
+
+  if (exportBtn) {
+    exportBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      exportAnimations();
+    });
+  }
+  if (importInput) {
+    importInput.addEventListener('change', () => {
+      const f = importInput.files?.[0];
+      if (f) importAnimationsFromFile(f).finally(() => (importInput.value = ''));
+    });
+  }
 })();

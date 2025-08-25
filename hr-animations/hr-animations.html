@@ -1,86 +1,79 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>HR Animations</title>
-  
-  <link rel="stylesheet" href="hr-animations.css" />
-</head>
-<body>
-  <header class="appbar">
-    <h1>HR Animations</h1>
-    <p class="app-instructions">Tap to edit · Long-press for fullscreen</p>
-    <nav>  
-      <div class="button-row">
-        <button id="exportBtn">Export Animations</button><br>
-        <input type="file" id="importFile" accept="application/json" style="display:none">
-        <button type="button" onclick="document.getElementById('importFile').click()">Import Animations</button>
-        
-        <!-- <script> function printPage() {window.print();} <input type="button" value="Print" onclick="printPage()" /> </script> -->
-        
-        <button type="button" href="scoreboard.html">🏟 Back to Scoreboard</a>
-        </div>
-      </nav>
-    <span style="text-align: right;">Animations: <strong id="animTotalPrint">0 KB</strong><br>
-    Overall: <strong id="overallTotalPrint">0 KB</strong></span>
-  </header>
-
-  <main class="container">
-    <!-- <p class="hint">Tap an animation to edit.</p> -->
-    <section id="grid" class="grid"></section>
-  </main>
-
-  <!-- Editor Modal -->
-  <dialog id="editor">
-    <form method="dialog" class="editor">
-      <header class="editor-head">
-        <h2>Edit Animation <span id="editorSlot"></span></h2>
-      </header>     
-      
-      <div class="editor-body">
-        <div class="preview-wrap">
-          <div id="livePreview" class="live-preview">
-            <span id="liveText" class="live-text">Go Team</span>
-            <img id="liveImage" alt="" />
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>HR Animations</title>
+    
+    <link rel="stylesheet" href="hr-animations.css" />
+  </head>
+  <body>
+    <header class="appbar">
+      <h1>HR Animations</h1>
+      <p class="app-instructions">Tap to edit · Long-press for fullscreen</p>
+      <nav>  
+        <div class="button-row">
+          <button id="exportBtn">Export Animations</button><br>
+          <input type="file" id="importFile" accept="application/json" style="display:none">
+          <button type="button" onclick="document.getElementById('importFile').click()">Import Animations</button>
+          
+          <!-- <script> function printPage() {window.print();} <input type="button" value="Print" onclick="printPage()" /> </script> -->
+          
+          <button type="button" href="scoreboard.html">🏟 Back to Scoreboard</a>
           </div>
-          <small class="note">Preview (image overrides message/background)</small>
+        </nav>
+        <span style="text-align: right;">Animations: <strong id="animTotalPrint">0 KB</strong><br>
+          Overall: <strong id="overallTotalPrint">0 KB</strong></span>
+        </header>
+        
+        <main class="container">
+          <!-- <p class="hint">Tap an animation to edit.</p> -->
+          <section id="grid" class="grid"></section>
+        </main>
+        
+        <!-- Editor Modal -->
+        <dialog id="editor">
+          <form method="dialog" class="editor">
+            <header class="editor-head">
+              <h2>Edit Animation <span id="editorSlot"></span></h2>
+              <span style="text-align: right;">Animations: <strong id="animTotalEditor">0 KB</strong><br>
+                Overall: <strong id="overallTotalEditor">0 KB</strong></span>
+              </header>     
+              
+              <div class="editor-body">
+                <div class="preview-wrap">
+                  <div id="livePreview" class="live-preview">
+                    <span id="liveText" class="live-text">Go Team</span>
+                    <img id="liveImage" alt="" />
+                  </div>
+                  <small class="note">Preview (image overrides message/background)</small>
+                  
+                  <label class="field">
+                    <span>Background</span>
+                    <input id="fBg" type="color" />
+                  </label>
+                  <div class="totals">
+                    
+          <span class="mini-label">Current image: </span>
+          <span id="editorFileSize" class="mini-size">0 KB</span>
                   
        <div class="mini-info">
         <div class="mini-wrap checkerboard">
           <img id="liveMini" class="thumb-mini" alt="mini preview">
         </div>
-        <span class="mini-label">Current image: </span>
-        <span id="editorFileSize" class="mini-size">0 KB</span>
-      </div>
-
-          <div class="totals">
+        
+        </div>
+        
           </div>
         </div>
 
         <div class="fields">
+          <div class=container>
           <label class="field">
             <span>Message</span>
             <input id="fMessage" type="text" maxlength="60" placeholder="Go Team" />
           </label>
-
-          <label class="field">
-            <span>Background</span>
-            <input id="fBg" type="color" />
-          </label>
-
-          <label class="field">
-            <span>Upload Image (optional)</span>
-            <input id="fImage" type="file" accept="image/*" />
-          </label>
-
-          <fieldset class="field">
-            <legend>Display</legend>
-            <label><input type="radio" name="mode" value="message" id="modeMessage"> Show Message</label>
-            <label><input type="radio" name="mode" value="image" id="modeImage"> Show Image</label>
-            <label><input type="radio" name="mode" value="both" id="modeBoth"> Show Both</label>
-          </fieldset>
-
+        
           <label class="field">
             <span>Message Animation</span>
             <select id="fTextAnim">
@@ -90,6 +83,32 @@
               <option value="spin">Spin</option>
             </select>
           </label>
+
+          </div>
+          
+          <label class="field">
+            <span>Upload Image (optional)</span>
+            <input id="fImage" type="file" accept="image/*" />
+          </label>
+
+          <fieldset class="field">
+            <legend>Display</legend>
+            <div class="container">
+              <form>
+                <label class="radio-inline">
+                  <input type="radio" name="mode" value="message" id="modeMessage">Message
+                </label>
+                <label class="radio-inline">
+                  <input type="radio" name="mode" value="image" id="modeImage">Image
+                </label>
+                <label class="radio-inline">
+                  <input type="radio" name="mode" value="both" id="modeBoth">Both
+                </label>
+              </form>
+            </div>
+          </fieldset>
+
+
 
           <div class="actions-row">
             <button id="btnSave"   type="button" class="btn primary">Save</button>
