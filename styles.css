@@ -307,51 +307,6 @@ button, .score, .logo, .grid-name, .grid-score {
   -webkit-text-stroke: 2px red; /* for Webkit supported browsers */
 }
 
-/* .hr-box-left {
-  position:absolute ;
-  bottom: 0; 
-  width: 40vh;
-  height: 15vh;
-  background-color: rgb(120, 6, 6); 
-  border: 5px solid yellow;
-  border-bottom: none;  
-
-  overflow: hidden;
-  font-size: 2vh;
-  z-index: 999;
-  transition: opacity 0.5s ease;
-  opacity: 0;
-  cursor:crosshair;
-  pointer-events: auto;
-
-  text-align: left;
-  border-left: none;   
-  border-radius: 0 5vh 0 0; 
-} */
-
-/* .hr-box-right {
-  position: absolute ;
-  bottom: 0;
-  width: 40vh;
-  height: 15vh;
-  background-color: black; 
-  border: 5px solid blue;
-  border-bottom: none;   
-
-  overflow: hidden;
-  font-size: 2vh;
-  z-index: 999;
-  transition: opacity 0.5s ease;
-  opacity: 0;
-  cursor:crosshair;
-  pointer-events: auto;
-
-  right: 0;
-  direction: rtl;
-  border-right: none;   
-  border-radius: 5vh 0 0 0;
-
-} */
 
 .hr-box.faint {
   opacity: var(--faint-opacity, 0.05) !important;  /* set to 0 to fully hide it */

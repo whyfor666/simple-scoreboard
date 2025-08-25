@@ -116,20 +116,32 @@ function updateScoreUI(scoreElement) {
   scoreElement.textContent = currentScore;
 }
 
-// Tutorial logic
+// Tutorial logic — synced to #instructionsModal
 function showTutorial() {
-  document.getElementById("inningBox").style.pointerEvents = "none";
-  document.getElementById("outBox").style.pointerEvents = "none";
-  document.getElementById("tutorialOverlay").style.display = "flex";
-  // resetInfoButtonTimer();
+  const inning = document.getElementById("inningBox");
+  const out = document.getElementById("outBox");
+  const modalEl = document.getElementById("instructionsModal");
+
+  // If no modal exists, mark as shown and bail without disabling clicks
+  if (!modalEl) {localStorage.setItem("tutorialShown", "true"); return;}
+
+  // If you really want to disable clicks while modal is up, keep these:
+  if (inning) inning.style.pointerEvents = "none";
+  if (out) out.style.pointerEvents = "none";
+
+  modalEl.style.display = "flex";
 }
 
 function closeTutorial() {
-  document.getElementById("inningBox").style.pointerEvents = "auto";
-  document.getElementById("outBox").style.pointerEvents = "auto";
-  document.getElementById("tutorialOverlay").style.display = "none";
+  const inning = document.getElementById("inningBox");
+  const out = document.getElementById("outBox");
+  const modalEl = document.getElementById("instructionsModal");
+
+  if (inning) inning.style.pointerEvents = "auto";
+  if (out) out.style.pointerEvents = "auto";
+  if (modalEl) modalEl.style.display = "none";
+
   localStorage.setItem("tutorialShown", "true");
-  // resetInfoButtonTimer();
 }
 
 function resetInfoButtonTimer() {
@@ -200,11 +212,11 @@ function resetInfoButtonTimer() {
 
 // Keyboard mapping for home run messages
 const keyToMessage = {
-  '0': 0, 'y': 0,
-  '1': 1, 'h': 1, 
-  '2': 2, 'r': 2, 
-  '3': 3, 'x': 3,
-  '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9,
+  '0': 0, 
+  '1': 1,  
+  '2': 2,  
+  '3': 3, 
+  '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9
 };
 
 function displayHomeRunMessage(number) {
@@ -389,37 +401,6 @@ function decrementOut() {
   out = out === 0 ? 2 : out - 1;
   updateOutDisplay();
 }
-
-// HR box increment/decrement and hidden (faint) at 0
-// let hr = 0; 
-
-// function updateHRDisplay(hrElement){
-//   const count = parseInt (hrElement.dataset.hr, 10);
-//   const valueElement = hrElement.querySelector(".hr-value");
-
-//     if (!valueElement) {
-//     console.warn("Missing .hr-value in", hrElement);
-//     return;
-//   }
-
-//   hrElement.classList.remove("faint","visible");
-
-  // if (count === 0) {
-  //   valueElement.innerHTML = "";
-  //   hrElement.classList.add("faint");
-  // } else {
-  //   const icons = count === 1
-  //   ? ["🥎"]
-  //   : count === 2
-  //   ? ["🥎", "🥎"]
-  //   : ["❌","🥎", "🥎"];
-
-  //   valueElement.innerHTML = icons
-  //     .map(b => `<span class="hr-icon">${b}</span>`)
-  //     .join("");
-
-  //   hrElement.classList.add("visible"); 
-  // }
 
 let hr = 0;
 
@@ -612,8 +593,11 @@ function closeSettings() {
 function showInstructions() {
   document.getElementById("instructionsModal").style.display = "flex";
 }
+
+// Your Close button calls closeInstructions() in index.html.
+// Make it re-enable clicks too.
 function closeInstructions() {
-  document.getElementById("instructionsModal").style.display = "none";
+  closeTutorial();
 }
 
 document.getElementById("infoButton").addEventListener("click", () => {
@@ -715,3 +699,13 @@ function attachCharHints() {
     update();
   });
 }
+document.addEventListener('DOMContentLoaded', () => {
+  const inning = document.getElementById('inningBox');
+  const out = document.getElementById('outBox');
+  const modal = document.getElementById('instructionsModal');
+
+  if (inning) inning.style.pointerEvents = 'auto';
+  if (out) out.style.pointerEvents = 'auto';
+
+  if (!modal) localStorage.setItem('tutorialShown', 'true');
+});
